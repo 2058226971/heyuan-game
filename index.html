@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>贺元养成计划 💗 私人限定版</title>
+<style>
+  :root{
+    --pink:#ffb6d5; --pink-deep:#ff7eb9; --cream:#fff6ec; --brown:#8a6248;
+    --sky:#cfeaff; --green:#b8e6b0; --yellow:#ffe08a; --red:#ff6b6b;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0; font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#ffe3ef 0%,#fff6ec 45%,#e3f2ff 100%);
+    min-height:100vh; color:var(--brown); overflow-x:hidden;
+  }
+  /* ============ 顶栏 ============ */
+  #topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(255,255,255,.85); backdrop-filter:blur(8px);
+    border-bottom:3px dashed var(--pink);
+    padding:8px 14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  #topbar .logo{font-weight:900; font-size:18px; letter-spacing:1px;}
+  #topbar .logo span{color:var(--pink-deep);}
+  .pill{
+    background:#fff; border:2px solid var(--pink); border-radius:999px;
+    padding:3px 12px; font-size:13px; font-weight:700; white-space:nowrap;
+  }
+  .pill b{color:var(--pink-deep);}
+  #modeSwitch{
+    margin-left:auto; border:none; border-radius:999px; padding:6px 16px;
+    font-weight:900; font-size:13px; cursor:pointer; color:#fff;
+    background:linear-gradient(90deg,#ff7eb9,#ffb86b);
+    box-shadow:0 3px 8px rgba(255,126,185,.4);
+  }
+  /* ============ 主区域 ============ */
+  #main{display:flex; gap:14px; padding:14px; max-width:1200px; margin:0 auto; align-items:flex-start; flex-wrap:wrap;}
+  #stageWrap{flex:1 1 420px; min-width:340px;}
+  #panelWrap{flex:1 1 420px; min-width:340px; display:flex; flex-direction:column; gap:12px;}
+  .card{
+    background:#fff; border-radius:22px; border:3px solid var(--pink);
+    box-shadow:0 6px 18px rgba(255,140,190,.18);
+    padding:12px 14px;
+  }
+  .card h3{margin:2px 0 10px; font-size:15px; display:flex; align-items:center; gap:6px;}
+  .card h3 .tag{font-size:10px; background:var(--pink); color:#fff; border-radius:99px; padding:2px 8px; font-weight:700;}
+
+  /* 舞台 */
+  #stage{
+    position:relative; border-radius:22px; overflow:hidden;
+    background:linear-gradient(180deg,#cfeaff 0%,#e8f7ff 55%,#c8ecc0 55%,#b4e0a8 100%);
+    border:3px solid var(--pink); box-shadow:0 6px 18px rgba(255,140,190,.18);
+    height:480px; transition:transform .3s;
+  }
+  #stage.chaos{animation:shake .12s infinite;}
+  @keyframes shake{0%{transform:translate(2px,1px) rotate(.3deg)}50%{transform:translate(-2px,-1px) rotate(-.3deg)}100%{transform:translate(1px,-1px) rotate(.2deg)}}
+  .sun{position:absolute; right:26px; top:20px; width:58px; height:58px; border-radius:50%;
+    background:radial-gradient(circle,#fff3b0,#ffd75e); box-shadow:0 0 24px #ffe98a;}
+  .cloud{position:absolute; background:#fff; border-radius:999px; opacity:.9; animation:drift linear infinite;}
+  @keyframes drift{from{left:-120px}to{left:110%}}
+  #bubbleHY,#bubbleJL{
+    position:absolute; max-width:180px; background:#fff; border:2px solid var(--pink-deep);
+    border-radius:14px; padding:7px 10px; font-size:12px; font-weight:700; line-height:1.5;
+    opacity:0; transition:opacity .4s; z-index:5; word-break:break-all;
+  }
+  #bubbleHY{left:8px; top:34px;}
+  #bubbleJL{right:8px; top:76px; border-color:#7ac0ff;}
+  #bubbleJL::after,#bubbleHY::after{content:""; position:absolute; bottom:-9px; left:24px;
+    border:8px solid transparent; border-top-color:inherit;}
+  #bubbleHY::after{border-top-color:var(--pink-deep);}
+  #bubbleJL::after{border-top-color:#7ac0ff;}
+  #charArea{position:absolute; bottom:172px; left:0; right:0; display:flex; justify-content:center; align-items:flex-end; gap:6px;}
+  .charBox{position:relative; transition:transform .5s;}
+  #loveBar{
+    position:absolute; left:50%; transform:translateX(-50%); top:-16px; width:90px; height:12px;
+    background:#fff; border:2px solid #ff7eb9; border-radius:99px; overflow:hidden;
+  }
+  #loveFill{height:100%; width:0%; background:linear-gradient(90deg,#ff9dc4,#ff5ca0); transition:width .4s;}
+  .charName{
+    text-align:center; font-size:12px; font-weight:900; margin-top:2px;
+    background:#fff; border-radius:99px; padding:1px 8px; display:inline-block;
+    border:2px solid var(--pink); position:relative; left:50%; transform:translateX(-50%);
+  }
+  #stageMsg{
+    position:absolute; left:50%; top:6px; transform:translateX(-50%);
+    font-size:12px; font-weight:700; color:#5c7a99; background:rgba(255,255,255,.75);
+    padding:2px 12px; border-radius:99px; white-space:nowrap; max-width:94%;
+    overflow:hidden; text-overflow:ellipsis;
+  }
+  /* ===== 舞台内嵌操作坞（按键和动画同框） ===== */
+  #dock{position:absolute; left:8px; right:8px; bottom:8px; z-index:7;
+    background:rgba(255,255,255,.94); border:2.5px solid var(--pink); border-radius:18px;
+    padding:6px 8px 7px; backdrop-filter:blur(4px); box-shadow:0 4px 12px rgba(255,140,190,.25);}
+  #dockTabs{display:flex; gap:6px; margin-bottom:5px;}
+  .dtab{flex:1; text-align:center; font-size:12px; font-weight:900; padding:4px 0; border-radius:10px;
+    background:#ffeef5; border:2px solid #ffd0e3; cursor:pointer; user-select:none; color:var(--brown);}
+  .dtab.on{background:var(--pink-deep); color:#fff; border-color:var(--pink-deep);}
+  #dockBtns{display:grid; grid-template-columns:repeat(5,1fr); gap:5px;}
+  .dbtn{border:2px solid #ffcaa0; border-radius:12px; padding:5px 0 3px; font-size:19px; cursor:pointer;
+    background:linear-gradient(180deg,#fff,#ffeede); line-height:1.1;}
+  .dbtn:active{transform:scale(.9);}
+  .dbtn i{display:block; font-style:normal; font-size:9px; font-weight:900; color:#b08050; margin-top:1px;}
+  .dbtn.pink{background:linear-gradient(180deg,#fff0f6,#ffd7e8); border-color:#ff9dc4;}
+  .dbtn.blue{background:linear-gradient(180deg,#eef6ff,#d5eaff); border-color:#9ccdf5;}
+  .dbtn.green{background:linear-gradient(180deg,#f0fff0,#d8f5d0); border-color:#9fd894;}
+  .dbtn.gold{background:linear-gradient(180deg,#fffbe6,#ffeaa0); border-color:#e8c465;}
+  .dbtn.red{background:linear-gradient(180deg,#fff0f0,#ffd6d6); border-color:#ff9c9c;}
+  /* 状态条 */
+  .stat{display:flex; align-items:center; gap:8px; margin:7px 0; font-size:12px; font-weight:700;}
+  .stat .lbl{width:74px; flex-shrink:0;}
+  .bar{flex:1; height:14px; background:#ffeef5; border-radius:99px; overflow:hidden; border:2px solid #ffd0e3;}
+  .bar i{display:block; height:100%; border-radius:99px; transition:width .4s, background .4s;}
+  .stat .val{width:44px; text-align:right; flex-shrink:0;}
+  /* 按钮 */
+  .btns{display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px;}
+  .btn{
+    border:none; border-radius:16px; padding:10px 6px; font-weight:900; font-size:13px;
+    cursor:pointer; color:#7a4a2e; background:linear-gradient(180deg,#fff,#ffeede);
+    border:2px solid #ffcaa0; transition:transform .08s; line-height:1.4;
+  }
+  .btn small{display:block; font-size:10px; font-weight:600; color:#b08050;}
+  .btn:active{transform:scale(.93);}
+  .btn.pink{background:linear-gradient(180deg,#fff0f6,#ffd7e8); border-color:#ff9dc4;}
+  .btn.blue{background:linear-gradient(180deg,#eef6ff,#d5eaff); border-color:#9ccdf5;}
+  .btn.green{background:linear-gradient(180deg,#f0fff0,#d8f5d0); border-color:#9fd894;}
+  .btn.red{background:linear-gradient(180deg,#fff0f0,#ffd6d6); border-color:#ff9c9c;}
+  .btn.gold{background:linear-gradient(180deg,#fffbe6,#ffeaa0); border-color:#e8c465;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  /* Tab */
+  #tabs{display:flex; gap:6px; flex-wrap:wrap;}
+  .tab{
+    flex:1; text-align:center; padding:8px 4px; border-radius:14px; font-weight:900; font-size:13px;
+    background:#fff; border:2px solid #ffd0e3; cursor:pointer; user-select:none;
+  }
+  .tab.on{background:var(--pink-deep); color:#fff; border-color:var(--pink-deep);}
+  .page{display:none;}
+  .page.on{display:block;}
+  /* 蠢蛋日记 */
+  #sillyList{max-height:170px; overflow-y:auto; font-size:13px;}
+  #sillyList div{background:#fff7f0; border-radius:12px; padding:6px 10px; margin:6px 0; border-left:4px solid #ffb86b;}
+  #sillyList .time{font-size:10px; color:#b08050; margin-right:6px;}
+  #sillyList .del{float:right; cursor:pointer; color:#e0a0a0; font-weight:900;}
+  /* 聊天 */
+  #chatLog{height:150px; overflow-y:auto; font-size:13px; background:#fff7fb; border-radius:14px; padding:8px; border:2px solid #ffd0e3;}
+  #chatLog .m{margin:4px 0;}
+  #chatLog .m b{color:var(--pink-deep);}
+  #chatLog .sys{color:#9a8bb0; font-size:11px;}
+  #chatRow{display:flex; gap:8px; margin-top:8px;}
+  #chatInput{flex:1; border:2px solid var(--pink); border-radius:12px; padding:8px 10px; font-size:14px; outline:none; font-family:inherit;}
+  #chatSend{border:none; background:var(--pink-deep); color:#fff; font-weight:900; border-radius:12px; padding:0 18px; cursor:pointer;}
+  /* 日志 */
+  #feed{height:120px; overflow-y:auto; font-size:12px; line-height:1.7;}
+  #feed div{border-bottom:1px dashed #ffd9e8; padding:2px 0;}
+  #feed .t{color:#c99aae; margin-right:4px; font-size:10px;}
+  /* 弹窗 */
+  #modalBg{position:fixed; inset:0; background:rgba(120,60,90,.45); z-index:100; display:none; align-items:center; justify-content:center;}
+  #modalBg.on{display:flex;}
+  #modal{
+    background:#fff; border-radius:24px; border:3px solid var(--pink-deep);
+    max-width:340px; width:88%; padding:18px; text-align:center;
+    animation:pop .25s;
+  }
+  @keyframes pop{from{transform:scale(.7); opacity:0}to{transform:scale(1); opacity:1}}
+  #modal .frog{font-size:44px;}
+  #modal h4{margin:6px 0; font-size:16px;}
+  #modal p{font-size:13px; line-height:1.7; margin:6px 0 12px;}
+  #modal .btn{margin:3px;}
+  /* 舌头（毒液模式） */
+  body.tongue, body.tongue *{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext x='2' y='24' font-size='24'%3E%F0%9F%91%85%3C/text%3E%3C/svg%3E") 8 8, auto;}
+  #tongueSvg{position:absolute; left:0; top:0; width:100%; height:100%; z-index:6; pointer-events:none; display:none;}
+  /* ===== 动作特效层（emoji小道具：挥手/脱裤子/马桶/草地等） ===== */
+  .fxLayer{position:absolute; inset:0; pointer-events:none; z-index:5; font-size:34px;}
+  .fxLayer span{position:absolute;}
+  .handSwing{transform-origin:80% 10%; animation:handSwing .32s ease-in-out 4;}
+  @keyframes handSwing{0%{transform:rotate(-85deg)}55%{transform:rotate(18deg)}100%{transform:rotate(-85deg)}}
+  .buttHit{animation:buttHit .8s ease 2;}
+  @keyframes buttHit{0%,45%,100%{opacity:0; transform:scale(.5)}55%{opacity:1; transform:scale(1.25)}75%{opacity:.7; transform:scale(1)}}
+  .shyHand{animation:shyTremble .18s linear 12;}
+  @keyframes shyTremble{0%,100%{transform:translate(0,0) rotate(-4deg)}50%{transform:translate(-2px,1px) rotate(4deg)}}
+  .pantsDrop{animation:pantsDrop 1.1s ease forwards;}
+  @keyframes pantsDrop{0%{transform:translateY(-14px); opacity:0}30%{opacity:1}100%{transform:translateY(26px); opacity:.9}}
+  .wipeMove{animation:wipeMove .35s ease-in-out 6;}
+  @keyframes wipeMove{0%,100%{transform:translate(0,0) rotate(-10deg)}50%{transform:translate(-6px,-4px) rotate(14deg)}}
+  .poopFall{animation:poopFall .7s ease-in 3;}
+  @keyframes poopFall{0%{transform:translateY(-10px) scale(.4); opacity:0}40%{opacity:1}100%{transform:translateY(34px) scale(1); opacity:.85}}
+  .toiletPop{animation:toiletPop .4s ease-out backwards;}
+  @keyframes toiletPop{from{transform:scale(0)}70%{transform:scale(1.2)}to{transform:scale(1)}}
+  .grassMat{font-size:30px !important; letter-spacing:-8px; animation:grassIn .4s ease backwards;}
+  @keyframes grassIn{from{transform:translateY(14px); opacity:0}}
+  /* ===== 动作引擎V2：姿势/肢体/表情 ===== */
+  .limbSvg{position:absolute; left:0; top:0; width:100%; height:calc(100% - 24px);
+    pointer-events:none; z-index:6; overflow:visible;}
+  .charPhoto img{transition:transform .5s ease;}
+  .pose-bend{transform:rotate(-22deg) translateY(7%) scale(1.02,.95); transform-origin:50% 88%;}
+  .pose-bend2{transform:rotate(-34deg) translateY(11%) scale(1.04,.9); transform-origin:50% 88%;}
+  .pose-sit{transform:translateY(10%) scale(1.06,.88); transform-origin:50% 92%;}
+  .pose-lie{transform:rotate(-78deg) translateY(-6%); transform-origin:50% 80%;}
+  .pose-lean{transform:rotate(9deg) translateY(2%);}
+  .pose-strut{animation:poseStrut .5s ease-in-out infinite;}
+  @keyframes poseStrut{0%,100%{transform:rotate(-5deg) translateY(0)}50%{transform:rotate(5deg) translateY(-6%)}}
+  .pose-twisty{animation:poseTwist .55s ease-in-out 5;}
+  @keyframes poseTwist{0%,100%{transform:rotate(0) translateX(0)}25%{transform:rotate(-9deg) translateX(-4%)}75%{transform:rotate(9deg) translateX(4%)}}
+  .pose-jump2{animation:poseJump2 .5s ease 3;}
+  @keyframes poseJump2{0%,100%{transform:translateY(0)}45%{transform:translateY(-26%) scale(1.04)}}
+  .mouthGrp{transform-box:fill-box; transform-origin:50% 15%;}
+  .mouth-chew{animation:mouthChew .34s ease-in-out 8;}
+  @keyframes mouthChew{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.45)}}
+  .impactRing{position:absolute; width:56px; height:56px; border:6px solid #ff5c5c; border-radius:50%;
+    transform:translate(-50%,-50%) scale(.2); opacity:0; pointer-events:none; z-index:7;
+    animation:impactRingAnim .45s ease-out forwards;}
+  @keyframes impactRingAnim{0%{opacity:.95; transform:translate(-50%,-50%) scale(.25)}100%{opacity:0; transform:translate(-50%,-50%) scale(1.6)}}
+  /* ===== 姿势动画 ===== */
+  @keyframes animBend{0%,100%{transform:translateY(0) rotate(0)}30%,70%{transform:translateY(14px) rotate(-30deg) scale(1.02,.94)}}
+  .anim-bend #svgHY{transform-origin:50% 88%; animation:animBend .55s ease 3}
+  @keyframes animShy{0%,100%{transform:rotate(0) translateX(0)}25%{transform:rotate(-8deg) translateX(-5px) scale(1.03)}75%{transform:rotate(8deg) translateX(5px) scale(1.03)}}
+  .anim-shy #svgHY{animation:animShy .5s ease-in-out 5}
+  @keyframes animSit{0%{transform:translateY(0)}100%{transform:translateY(16px) rotate(2deg)}}
+  .anim-sit #svgJL{animation:animSit .4s ease forwards}
+  /* ===== 奶蛙上帝 ===== */
+  .frogPop{position:absolute; z-index:8; animation:frogIn .35s ease; pointer-events:none; text-align:center;}
+  .frogPop img{height:118px; filter:drop-shadow(0 6px 8px rgba(0,0,0,.28)); display:block; animation:frogBob 1s ease-in-out infinite alternate;}
+  .frogPop .frogLine{font-size:12px; font-weight:900; color:#7a5c00; background:rgba(255,244,180,.95);
+    border:2px solid #e8c465; border-radius:99px; padding:2px 10px; margin:4px auto 0; width:max-content; max-width:150px;}
+  .frogPop .handSwing{font-size:40px !important; right:-16px; top:6px;}
+  @keyframes frogIn{from{transform:translateY(46px) scale(.5); opacity:0}}
+  @keyframes frogBob{from{transform:translateY(0)}to{transform:translateY(-7px)}}
+  /* ===== 动作动画 ===== */
+  @keyframes animJump{0%,100%{transform:translateY(0)}40%{transform:translateY(-22px) scale(1.03)}70%{transform:translateY(0) scale(1.06,.94)}}
+  @keyframes animChomp{0%,100%{transform:scale(1)}30%{transform:scale(1.1,.88)}60%{transform:scale(.9,1.1)}}
+  @keyframes animShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-8px) rotate(-4deg)}75%{transform:translateX(8px) rotate(4deg)}}
+  @keyframes animDoze{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+  @keyframes animWiggle{0%,100%{transform:rotate(0)}30%{transform:rotate(-10deg)}60%{transform:rotate(10deg)}}
+  @keyframes animFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes animSad{0%{transform:translateY(0)}100%{transform:translateY(6px)}}
+  @keyframes animNod{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(7px) rotate(9deg)}}
+  @keyframes animDance{0%{transform:rotate(0) translateY(0)}25%{transform:rotate(-9deg) translateY(-12px)}50%{transform:rotate(0) translateY(0)}75%{transform:rotate(9deg) translateY(-12px)}}
+  @keyframes animSpin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+  @keyframes animWalk{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-7px) rotate(4deg)}}
+  @keyframes animHug{0%,100%{transform:scale(1)}40%{transform:scale(1.08,.94)}70%{transform:scale(.94,1.06)}}
+  @keyframes animTremble{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,1px)}75%{transform:translate(2px,-1px)}}
+  .anim-jump #svgHY,.anim-jump #svgJL{animation:animJump .55s ease 3}
+  .anim-chomp #svgHY,.anim-chomp #svgJL{animation:animChomp .3s ease 6}
+  .anim-shake #svgHY,.anim-shake #svgJL{animation:animShake .2s linear 6}
+  .anim-doze #svgHY,.anim-doze #svgJL{animation:animDoze 2s ease-in-out 2}
+  .anim-wiggle #svgHY,.anim-wiggle #svgJL{animation:animWiggle .4s ease 4}
+  .anim-float #svgHY,.anim-float #svgJL{animation:animFloat 1.2s ease 2}
+  .anim-sad #svgHY,.anim-sad #svgJL{animation:animSad 1.2s ease 2}
+  .anim-nod #svgHY,.anim-nod #svgJL{animation:animNod .5s ease 3}
+  .anim-dance #svgHY,.anim-dance #svgJL{animation:animDance 1s ease 3}
+  .anim-spin #svgHY,.anim-spin #svgJL{animation:animSpin .8s ease-in-out 1}
+  .anim-walk #svgHY,.anim-walk #svgJL{animation:animWalk .35s ease-in-out infinite}
+  .anim-hug #svgHY,.anim-hug #svgJL{animation:animHug .45s ease 4}
+  .anim-tremble #svgHY,.anim-tremble #svgJL{animation:animTremble .1s linear 12}
+  /* ===== 立绘照片模式（直接用原图，不重画） ===== */
+  .charPhoto{position:relative; line-height:0}
+  .charPhoto img{width:100%; display:block; transition:filter .4s;
+    filter:drop-shadow(0 6px 10px rgba(0,0,0,.12))}
+  .ov{position:absolute; font-size:30px; pointer-events:none; line-height:1;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+  .buttRed{position:absolute; left:50%; bottom:24%; width:48%; height:14%; transform:translateX(-50%);
+    background:radial-gradient(ellipse at center, rgba(255,70,70,.8), rgba(255,70,70,0) 72%);
+    border-radius:50%; pointer-events:none}
+  .prop{position:absolute; font-size:28px; z-index:8; pointer-events:none;
+    animation:propFly 1.7s ease-in forwards;}
+  .prop.drop{animation:propDrop 1.4s ease-in forwards;}
+  @keyframes propFly{0%{opacity:0;transform:translateY(16px) scale(.4) rotate(-10deg)}25%{opacity:1}100%{opacity:0;transform:translateY(-70px) scale(1.3) rotate(14deg)}}
+  @keyframes propDrop{0%{opacity:0;transform:translateY(-60px) scale(.5)}30%{opacity:1;transform:translateY(0) scale(1.1)}60%{transform:translateY(0) scale(.95)}100%{opacity:0;transform:translateY(0) scale(.6)}}
+  /* 爱心飘浮 */
+  .heart{position:fixed; z-index:99; font-size:20px; animation:floatUp 1.6s ease-out forwards; pointer-events:none;}
+  @keyframes floatUp{0%{opacity:1; transform:translateY(0) scale(.8)}100%{opacity:0; transform:translateY(-90px) scale(1.4)}}
+  .toast{
+    position:fixed; left:50%; top:70px; transform:translateX(-50%);
+    background:#fff; border:2px solid var(--pink-deep); color:var(--pink-deep);
+    font-weight:900; padding:8px 20px; border-radius:99px; z-index:120;
+    box-shadow:0 4px 14px rgba(0,0,0,.15); animation:pop .25s;
+  }
+  ::-webkit-scrollbar{width:6px;} ::-webkit-scrollbar-thumb{background:#ffcadf; border-radius:99px;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">🍼 贺元养成计划 <span>私人限定版</span></div>
+  <div class="pill">📅 第 <b id="uiWeek">1</b> 周 · 第 <b id="uiDay">1</b> 天</div>
+  <div class="pill">🕐 <b id="uiTime">08:00</b></div>
+  <div class="pill">💰 <b id="uiMoney">200</b> 元</div>
+  <button id="modeSwitch">🎮 切换小贺元模式</button>
+</div>
+
+<div id="main">
+  <!-- ============ 左：舞台 + 状态 ============ -->
+  <div id="stageWrap">
+    <div id="stage">
+      <div class="sun"></div>
+      <div class="cloud" style="width:70px;height:26px;top:36px;animation-duration:26s;"></div>
+      <div class="cloud" style="width:50px;height:20px;top:86px;animation-duration:38s;animation-delay:-12s;"></div>
+      <div id="bubbleHY"></div>
+      <div id="bubbleJL"></div>
+      <div id="charArea">
+        <div class="charBox" id="boxHY">
+          <div id="loveBar" style="display:none"><div id="loveFill"></div></div>
+          <div id="svgHY"></div>
+          <div class="charName" id="nameHY">贺元</div>
+        </div>
+        <div class="charBox" id="boxJL" style="display:none">
+          <div id="svgJL"></div>
+          <div class="charName" style="border-color:#7ac0ff">小嘉琳</div>
+        </div>
+      </div>
+      <svg id="tongueSvg">
+        <defs><linearGradient id="tgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#a8134a"/><stop offset="55%" stop-color="#ff2d78"/><stop offset="100%" stop-color="#ff6b9e"/>
+        </linearGradient></defs>
+        <path id="tonguePath" fill="url(#tgGrad)" stroke="#8e0f3d" stroke-width="1.5" opacity=".97"/>
+        <path id="tongueGloss" fill="none" stroke="#fff" stroke-width="2.5" opacity=".4" stroke-linecap="round"/>
+        <ellipse id="tongueTip" rx="7" ry="5" fill="#ff5ca0" stroke="#8e0f3d" stroke-width="1.5"/>
+      </svg>
+      <div id="dock">
+        <div id="dockTabs">
+          <span class="dtab on" data-d="care">🍚 照顾</span>
+          <span class="dtab" data-d="jl">💗 嘉琳专属</span>
+          <span class="dtab" data-d="hy">🐣 贺元</span>
+        </div>
+        <div id="dockBtns"></div>
+      </div>
+      <div id="stageMsg">贺元正在快乐地等投喂 🥺</div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>📊 贺元状态 <span class="tag" id="stageTag">健康幼崽</span></h3>
+      <div id="statList"></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>📜 生活实录 <span class="tag">自动记录</span></h3>
+      <div id="feed"></div>
+    </div>
+  </div>
+
+  <!-- ============ 右：操作面板 ============ -->
+  <div id="panelWrap">
+    <div class="card">
+      <div id="tabs">
+        <div class="tab on" data-page="care">🍚 照顾</div>
+        <div class="tab" data-page="jl">💗 嘉琳专属</div>
+        <div class="tab" data-page="chat">💬 聊天学舌</div>
+        <div class="tab" data-page="silly">🤪 蠢蛋日记</div>
+        <div class="tab" data-page="set">⚙️ 设置</div>
+        <div class="tab" data-page="hy">🐣 小贺元模式</div>
+      </div>
+    </div>
+
+    <!-- 照顾 -->
+    <div class="card page on" id="page-care">
+      <h3>🍚 日常照顾 <span class="tag">上帝的权柄</span></h3>
+      <div class="btns">
+        <button class="btn green" id="btnFeed">🍚 喂饭<small>健康+ 体型+3 长大</small></button>
+        <button class="btn blue" id="btnSleep">😴 哄睡<small>健康+8 体型+2 长高</small></button>
+        <button class="btn" id="btnGame">🎮 打游戏<small>心情+ 成绩-</small></button>
+        <button class="btn gold" id="btnJunk">🍔 垃圾食品<small>¥15 爽但伤身</small></button>
+        <button class="btn" id="btnStudy">📚 上课<small>成绩+ 但累瘦-2%</small></button>
+        <button class="btn pink" id="btnChatJL">💬 找嘉琳聊天<small>心情+ 爱意+</small></button>
+        <button class="btn gold" id="btnWork">💼 打工挣钱<small>挣钱 但累瘦-3%</small></button>
+        <button class="btn red" id="btnHospital">🏥 去医院<small>¥88 立刻痊愈</small></button>
+        <button class="btn gold" id="btnUnlock">🦄 养小嘉琳<small>¥520 终身解锁</small></button>
+        <button class="btn green" id="btnVisit">🚄 每周去找嘉琳<small>本周必做！</small></button>
+      </div>
+      <div style="font-size:11px;color:#c99aae;margin-top:8px" id="weekWarn">💡 本周还没去找嘉琳哦，不去他会伤心！</div>
+    </div>
+
+    <!-- 嘉琳专属 -->
+    <div class="card page" id="page-jl">
+      <h3>💗 嘉琳专属操作 <span class="tag">只有嘉琳能按</span></h3>
+      <div class="btns">
+        <button class="btn red" id="btnSlap">🖐️ 打贺元屁屁<small>他会变红并惨叫</small></button>
+        <button class="btn pink" id="btnWipe">🧻 给他擦屁屁<small>卫生+</small></button>
+        <button class="btn" id="btnPoop">💩 监督拉屎<small>检查今天有没有拉</small></button>
+        <button class="btn" id="btnCheckPoop">🔬 查💩报告<small>判断是否健康</small></button>
+        <button class="btn pink" id="btnLove">💗 说爱贺元<small>每天必须！防心病</small></button>
+        <button class="btn gold" id="btnTongue">👅 舌头模式<small>毒液同款 拖着舔</small></button>
+      </div>
+      <div style="font-size:11px;color:#c99aae;margin-top:8px" id="loveWarn">💡 今天还没对贺元说爱他！不说他心里会有问题要进医院的！</div>
+    </div>
+
+    <!-- 聊天学舌 -->
+    <div class="card page" id="page-chat">
+      <h3>💬 和贺元聊天 <span class="tag">他会学你说话</span></h3>
+      <div id="chatLog"></div>
+      <div id="chatRow">
+        <input id="chatInput" placeholder="对贺元说点什么……" maxlength="60">
+        <button id="chatSend">发送</button>
+      </div>
+    </div>
+
+    <!-- 蠢蛋日记 -->
+    <div class="card page" id="page-silly">
+      <h3>🤪 蠢蛋行为登记处 <span class="tag">永久存档</span></h3>
+      <div id="chatRow">
+        <input id="sillyInput" placeholder="录入贺元的蠢蛋行为……" maxlength="50">
+        <button class="btn gold" style="padding:8px 14px" id="sillyAdd">登记！</button>
+      </div>
+      <div id="sillyList"></div>
+    </div>
+
+    <!-- 设置 -->
+    <div class="card page" id="page-set">
+      <h3>⚙️ 性格设置 <span class="tag">决定他的反应</span></h3>
+      <div class="btns" id="personBtns">
+        <button class="btn pink" data-p="呆萌粘人">🥺 呆萌粘人<small>说啥都信</small></button>
+        <button class="btn blue" data-p="叛逆嘴硬">😤 叛逆嘴硬<small>嘴硬心软</small></button>
+        <button class="btn" data-p="戏精附体">🎭 戏精附体<small>一秒哭出来</small></button>
+        <button class="btn gold" data-p="舔狗本狗">🐶 舔狗本狗<small>嘉琳最大</small></button>
+      </div>
+      <div style="margin-top:8px;font-size:12px">当前性格：<b id="pNow" style="color:var(--pink-deep)">呆萌粘人</b></div>
+      <hr style="border:none;border-top:2px dashed #ffd0e3;margin:12px 0">
+      <h3>🔗 双人好友联机 <span class="tag">上帝+贺元同屏</span></h3>
+      <button class="btn blue" id="btnLink" style="width:100%">👥 开启双人联机（同时解锁上帝和小贺元的操作）</button>
+      <div style="font-size:11px;color:#c99aae;margin-top:6px">两个人挤在同一台设备上一起养，轮流按按钮就是联机了（本游戏仅限二人世界）</div>
+    </div>
+
+    <!-- 小贺元模式 -->
+    <div class="card page" id="page-hy">
+      <h3>🐣 小贺元视角 <span class="tag" id="hyTag">上帝在看着你</span></h3>
+      <div style="font-size:12px;line-height:1.8;margin-bottom:8px">
+        你现在是贺元本人！体会嘉琳的快乐：学习的成就感、打游戏的爽感，以及<b style="color:var(--red)">欺瞒上帝的刺激感</b>——
+        你可以偷偷不学习、出去约会、吃垃圾食品，但奶蛙上帝会<b>不定期突击检查</b>⚠️
+      </div>
+      <div class="btns">
+        <button class="btn blue" id="hyStudy">📚 学习<small>成就感+ 有点累</small></button>
+        <button class="btn" id="hyGame">🎮 打游戏<small>爽！成就感-</small></button>
+        <button class="btn pink" id="hyDate">💌 偷偷约会<small>巨爽但会被查</small></button>
+        <button class="btn gold" id="hyJunk">🍔 垃圾食品<small>快乐但伤身体</small></button>
+        <button class="btn pink" id="hyCuddle">🤗 求抱抱<small>心情+ 心理+</small></button>
+        <button class="btn gold" id="hyGift">🎁 送礼物<small>¥30 嘉琳爱意+15</small></button>
+        <button class="btn green" id="hyMom">👶 叫妈妈<small>嘉琳专属彩蛋</small></button>
+        <button class="btn red" id="hyPoop">🚽 拉屎<small>每日例行公事</small></button>
+      </div>
+      <div style="font-size:11px;color:#c99aae;margin-top:8px">奶蛙上帝平时伪装成一只安静的奶蛙🐸……如果你发现了他的真身，拆穿的话会引起动乱哦</div>
+    </div>
+  </div>
+</div>
+
+<div id="modalBg"><div id="modal"></div></div>
+
+<script>
+/* =====================================================
+   贺元养成计划 · 私人限定版
+   仅限郑贺元 & 董嘉琳 二人世界使用 💗
+===================================================== */
+
+/* ---------- SVG 角色工厂：严格还原嘉琳手绘立绘 ---------- */
+function earsC(fluffy){ // 毛绒耳朵
+  return `<ellipse cx="18" cy="60" rx="16" ry="20" fill="#c9a37e"/>
+    <ellipse cx="18" cy="60" rx="11" ry="14" fill="#e8c9a8"/>
+    <ellipse cx="122" cy="60" rx="16" ry="20" fill="#c9a37e"/>
+    <ellipse cx="122" cy="60" rx="11" ry="14" fill="#e8c9a8"/>`;
+}
+function jlSVG(expr, sizePct){
+  // 嘉琳：黑发麻花辫+圆眼镜+粉裙+黄鞋+皇冠 —— 还原手绘图
+  let face='', tears='';
+  if(expr==='cry') tears = `<ellipse cx="52" cy="86" rx="5" ry="9" fill="#9cd8ff"/><ellipse cx="88" cy="86" rx="5" ry="9" fill="#9cd8ff"/>`;
+  if(expr==='sleep') face = `<path d="M55 90 Q62 96 69 90" stroke="#b06a5a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M71 90 Q78 96 85 90" stroke="#b06a5a" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  else if(expr==='cry') face = `<ellipse cx="62" cy="85" rx="9" ry="13" fill="#2b2b2b"/><ellipse cx="78" cy="85" rx="9" ry="13" fill="#2b2b2b"/>
+      <ellipse cx="64" cy="80" rx="3" ry="4.5" fill="#fff"/><ellipse cx="80" cy="80" rx="3" ry="4.5" fill="#fff"/>
+      <path d="M60 104 Q70 96 80 104" stroke="#e06287" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  else if(expr==='sick') face = `<ellipse cx="62" cy="85" rx="8" ry="10" fill="#2b2b2b"/><ellipse cx="78" cy="85" rx="8" ry="10" fill="#2b2b2b"/>
+      <path d="M64 104 Q70 99 76 104" stroke="#e06287" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <ellipse cx="46" cy="97" rx="7" ry="5" fill="#ffb3c0" opacity=".7"/><ellipse cx="94" cy="97" rx="7" ry="5" fill="#ffb3c0" opacity=".7"/>`;
+  else if(expr==='sad') face = `<ellipse cx="62" cy="85" rx="9" ry="12" fill="#2b2b2b"/><ellipse cx="78" cy="85" rx="9" ry="12" fill="#2b2b2b"/>
+      <ellipse cx="64" cy="81" rx="3" ry="4" fill="#fff"/><ellipse cx="80" cy="81" rx="3" ry="4" fill="#fff"/>
+      <path d="M62 105 Q70 100 78 105" stroke="#e06287" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  else if(expr==='wow') face = `<ellipse cx="62" cy="85" rx="10" ry="14" fill="#2b2b2b"/><ellipse cx="78" cy="85" rx="10" ry="14" fill="#2b2b2b"/>
+      <ellipse cx="64" cy="79" rx="4" ry="6" fill="#fff"/><ellipse cx="80" cy="79" rx="4" ry="6" fill="#fff"/>
+      <ellipse cx="70" cy="104" rx="7" ry="9" fill="#e06287"/>`;
+  else face = `<ellipse cx="62" cy="85" rx="9.5" ry="13" fill="#2b2b2b"/><ellipse cx="78" cy="85" rx="9.5" ry="13" fill="#2b2b2b"/>
+      <ellipse cx="59" cy="79" rx="4" ry="6" fill="#fff"/><ellipse cx="75" cy="79" rx="4" ry="6" fill="#fff"/>
+      <path d="M62 100 Q70 112 78 100 Q70 106 62 100Z" fill="#e06287"/>
+      <path d="M62 100 Q70 112 78 100" fill="#ff8fae"/>
+      <path d="M46 97 Q52 90 58 95" stroke="#b06a5a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M82 95 Q88 90 94 97" stroke="#b06a5a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  const blush = expr!=='sleep'?`<ellipse cx="42" cy="98" rx="8" ry="5" fill="#ffc9d6" opacity=".8"/><ellipse cx="98" cy="98" rx="8" ry="5" fill="#ffc9d6" opacity=".8"/>`:'';
+  return `<svg viewBox="0 0 140 190" width="${140*sizePct}" height="${190*sizePct}" style="overflow:visible">
+    <g transform="translate(0,${expr==='sleep'?6:0})">
+    ${earsC()}
+    <!-- 腿和黄鞋 -->
+    <rect x="55" y="158" width="8" height="16" rx="4" fill="#fdf3ec" stroke="#8a6248" stroke-width="2"/>
+    <rect x="77" y="158" width="8" height="16" rx="4" fill="#fdf3ec" stroke="#8a6248" stroke-width="2"/>
+    <ellipse cx="58" cy="177" rx="14" ry="8" fill="#ffd94d" stroke="#b08a30" stroke-width="2"/>
+    <ellipse cx="82" cy="177" rx="14" ry="8" fill="#ffd94d" stroke="#b08a30" stroke-width="2"/>
+    <circle cx="54" cy="175" r="3" fill="#fff"/><circle cx="78" cy="175" r="3" fill="#fff"/>
+    <!-- 粉裙 -->
+    <path d="M48 128 Q44 150 38 160 L102 160 Q96 150 92 128 Z" fill="#ff9ec2" stroke="#8a6248" stroke-width="2.5"/>
+    <path d="M40 158 Q70 168 100 158" stroke="#e27ba3" stroke-width="2" fill="none"/>
+    <path d="M52 138 Q70 130 88 138" stroke="#f4b8cc" stroke-width="2" fill="none"/>
+    <!-- 手臂 -->
+    <path d="M46 130 Q30 140 24 152" stroke="#8a6248" stroke-width="2.5" fill="none"/>
+    <ellipse cx="24" cy="154" rx="7" ry="6" fill="#fdf3ec" stroke="#8a6248" stroke-width="2"/>
+    <path d="M94 130 Q110 138 116 130" stroke="#8a6248" stroke-width="2.5" fill="none"/>
+    <ellipse cx="117" cy="128" rx="7" ry="6" fill="#fdf3ec" stroke="#8a6248" stroke-width="2"/>
+    <!-- 大头 -->
+    <circle cx="70" cy="72" r="46" fill="#fdf3ec" stroke="#8a6248" stroke-width="3"/>
+    <!-- 头发 -->
+    <path d="M26 66 Q24 22 70 24 Q116 22 114 66 Q112 44 96 46 Q80 50 70 44 Q56 50 40 48 Q28 48 26 66Z" fill="#26201d"/>
+    <path d="M112 58 Q124 70 118 92 Q112 104 104 98 Q114 80 108 62Z" fill="#26201d"/>
+    <!-- 小皇冠 -->
+    <path d="M104 12 L110 24 L117 12 L120 26 L126 14 L128 28 L112 30Z" fill="#ffd94d" stroke="#d8a520" stroke-width="1.5"/>
+    <!-- 小花发饰 -->
+    <g transform="translate(34,42)"><circle r="3" fill="#ffd94d"/><circle cx="0" cy="-4" r="3" fill="#fff"/><circle cx="4" cy="0" r="3" fill="#fff"/><circle cx="0" cy="4" r="3" fill="#fff"/><circle cx="-4" cy="0" r="3" fill="#fff"/></g>
+    <g transform="translate(106,44)"><circle r="3" fill="#ffd94d"/><circle cx="0" cy="-4" r="3" fill="#fff"/><circle cx="4" cy="0" r="3" fill="#fff"/><circle cx="0" cy="4" r="3" fill="#fff"/><circle cx="-4" cy="0" r="3" fill="#fff"/></g>
+    ${blush}
+    <!-- 圆框眼镜 -->
+    <circle cx="62" cy="85" r="17" fill="none" stroke="#8a6248" stroke-width="3"/>
+    <circle cx="78" cy="85" r="17" fill="none" stroke="#8a6248" stroke-width="3"/>
+    <path d="M79 85 Q70 80 61 85" stroke="#8a6248" stroke-width="3" fill="none"/>
+    ${face}${tears}
+    </g></svg>`;
+}
+function hySVG(expr, sizePct, buttRed){
+  // 贺元：严格还原手绘立绘——蓬松炸毛黑发+红波点蝴蝶结+毛绒大耳朵+大黑眼+红嘴笑+光膀子+绿色紫花短裤+白球鞋
+  let face='', tears='';
+  if(expr==='cry') tears=`<ellipse cx="50" cy="90" rx="5" ry="10" fill="#9cd8ff"/><ellipse cx="90" cy="90" rx="5" ry="10" fill="#9cd8ff"/>`;
+  if(expr==='sleep') face=`<path d="M54 88 Q60 94 66 88" stroke="#6a4a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M74 88 Q80 94 86 88" stroke="#6a4a3a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M60 104 Q70 111 80 104" stroke="#e03434" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  else if(expr==='cry') face=`<ellipse cx="60" cy="86" rx="9" ry="12.5" fill="#2b2b2b"/><ellipse cx="80" cy="86" rx="9" ry="12.5" fill="#2b2b2b"/>
+      <ellipse cx="63" cy="81" rx="3" ry="4.5" fill="#fff"/><ellipse cx="83" cy="81" rx="3" ry="4.5" fill="#fff"/>
+      <path d="M58 106 Q70 95 82 106" stroke="#e03434" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+  else if(expr==='sick') face=`<ellipse cx="60" cy="86" rx="8.5" ry="10.5" fill="#2b2b2b"/><ellipse cx="80" cy="86" rx="8.5" ry="10.5" fill="#2b2b2b"/>
+      <ellipse cx="63" cy="82" rx="3" ry="4" fill="#fff"/><ellipse cx="83" cy="82" rx="3" ry="4" fill="#fff"/>
+      <path d="M62 106 Q70 101 78 106" stroke="#e03434" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M46 92 Q40 88 42 84" stroke="#7fbf6f" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="44" cy="98" rx="7" ry="5" fill="#a8d89a" opacity=".8"/><ellipse cx="96" cy="98" rx="7" ry="5" fill="#a8d89a" opacity=".8"/>`;
+  else if(expr==='sad') face=`<ellipse cx="60" cy="86" rx="9" ry="12" fill="#2b2b2b"/><ellipse cx="80" cy="86" rx="9" ry="12" fill="#2b2b2b"/>
+      <ellipse cx="63" cy="81" rx="3" ry="4.5" fill="#fff"/><ellipse cx="83" cy="81" rx="3" ry="4.5" fill="#fff"/>
+      <path d="M62 107 Q70 101 78 107" stroke="#e03434" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  else if(expr==='wow') face=`<ellipse cx="60" cy="86" rx="10" ry="13.5" fill="#2b2b2b"/><ellipse cx="80" cy="86" rx="10" ry="13.5" fill="#2b2b2b"/>
+      <ellipse cx="63" cy="80" rx="3.5" ry="5.5" fill="#fff"/><ellipse cx="83" cy="80" rx="3.5" ry="5.5" fill="#fff"/>
+      <ellipse cx="70" cy="105" rx="7" ry="10" fill="#e03434"/>`;
+  else face=`<ellipse cx="60" cy="86" rx="9.5" ry="12.5" fill="#2b2b2b"/><ellipse cx="80" cy="86" rx="9.5" ry="12.5" fill="#2b2b2b"/>
+      <ellipse cx="57" cy="81" rx="3" ry="4.5" fill="#fff"/><ellipse cx="77" cy="81" rx="3" ry="4.5" fill="#fff"/>
+      <ellipse cx="63" cy="79" rx="2.2" ry="3.2" fill="#fff"/><ellipse cx="83" cy="79" rx="2.2" ry="3.2" fill="#fff"/>
+      <path d="M57 101 Q70 115 83 101 Q70 108 57 101Z" fill="#e03434"/>
+      <ellipse cx="44" cy="96" rx="7" ry="4.5" fill="#f05a5a" opacity=".85"/><ellipse cx="96" cy="96" rx="7" ry="4.5" fill="#f05a5a" opacity=".85"/>`;
+  const butt = buttRed? `<path d="M44 132 Q70 122 96 132 L96 144 Q70 138 44 144Z" fill="#ff6b6b" opacity=".9"/>`:'';
+  return `<svg viewBox="0 0 140 190" width="${140*sizePct}" height="${190*sizePct}" style="overflow:visible">
+    <g transform="translate(0,${expr==='sleep'?6:0})">
+    <!-- 毛绒大耳朵（立绘：棕绒耳朵） -->
+    <ellipse cx="17" cy="82" rx="15" ry="20" fill="#b98f6c"/>
+    <ellipse cx="17" cy="82" rx="10" ry="14" fill="#e3c3a2"/>
+    <ellipse cx="123" cy="82" rx="15" ry="20" fill="#b98f6c"/>
+    <ellipse cx="123" cy="82" rx="10" ry="14" fill="#e3c3a2"/>
+    <!-- 腿+白球鞋（三道杠） -->
+    <rect x="56" y="160" width="7" height="14" rx="3.5" fill="#fdf3ec" stroke="#caa07a" stroke-width="2"/>
+    <rect x="77" y="160" width="7" height="14" rx="3.5" fill="#fdf3ec" stroke="#caa07a" stroke-width="2"/>
+    <g>
+      <ellipse cx="57" cy="177" rx="15" ry="8" fill="#fff" stroke="#9a9a9a" stroke-width="2"/>
+      <path d="M50 174 L64 171 M50 177 L64 174 M50 180 L64 177" stroke="#2b2b2b" stroke-width="2"/>
+      <ellipse cx="83" cy="177" rx="15" ry="8" fill="#fff" stroke="#9a9a9a" stroke-width="2"/>
+      <path d="M76 171 L90 174 M76 174 L90 177 M76 177 L90 180" stroke="#2b2b2b" stroke-width="2"/>
+    </g>
+    <!-- 屁屁红印 -->
+    ${butt}
+    <!-- 绿色紫花短裤 -->
+    <path d="M46 128 L94 128 L98 152 L76 154 L70 142 L64 154 L42 152 Z" fill="#8ac832" stroke="#5a9020" stroke-width="2.5"/>
+    <path d="M52 136 l8 -3 l3 8 l-8 3z" fill="#a86ae8"/>
+    <circle cx="84" cy="140" r="4" fill="#a86ae8"/>
+    <path d="M60 146 q6 -4 10 2" stroke="#a86ae8" stroke-width="3" fill="none"/>
+    <ellipse cx="86" cy="148" rx="4" ry="3" fill="#a86ae8"/>
+    <path d="M70 130 l4 8 l-6 2z" fill="#a86ae8"/>
+    <!-- 光膀子躯干（皮肤）+肚脐 -->
+    <path d="M46 106 Q44 120 46 130 L94 130 Q96 120 94 106 Q82 114 70 112 Q58 114 46 106Z" fill="#fdf3ec" stroke="#caa07a" stroke-width="2.5"/>
+    <circle cx="70" cy="122" r="1.8" fill="#caa07a"/>
+    <path d="M50 110 Q52 116 50 120 M90 110 Q88 116 90 120" stroke="#e3c3a2" stroke-width="1.5" fill="none"/>
+    <!-- 手臂摊开掌心向上（立绘姿势） -->
+    <path d="M46 110 Q30 114 22 122" stroke="#caa07a" stroke-width="2.5" fill="none"/>
+    <ellipse cx="20" cy="124" rx="9" ry="6.5" fill="#fdf3ec" stroke="#8a6248" stroke-width="2" transform="rotate(-18 20 124)"/>
+    <path d="M94 110 Q110 114 118 122" stroke="#caa07a" stroke-width="2.5" fill="none"/>
+    <ellipse cx="120" cy="124" rx="9" ry="6.5" fill="#fdf3ec" stroke="#8a6248" stroke-width="2" transform="rotate(18 120 124)"/>
+    <!-- 大头 -->
+    <circle cx="70" cy="70" r="46" fill="#fdf3ec" stroke="#caa07a" stroke-width="3"/>
+    <!-- 蓬松炸毛黑发 -->
+    <path d="M24 64 Q16 34 34 28 Q36 14 52 18 Q58 4 72 12 Q84 2 92 16 Q110 12 110 30 Q126 36 116 64 Q112 46 96 52 Q100 40 86 46 Q88 34 76 42 Q70 30 62 42 Q50 34 52 48 Q38 44 42 56 Q28 48 24 64Z" fill="#1f1a17"/>
+    <path d="M28 62 Q26 40 40 34 Q36 46 38 58Z" fill="#1f1a17"/>
+    <path d="M112 60 Q118 70 114 84 Q108 92 102 88 Q112 74 106 62Z" fill="#1f1a17"/>
+    <!-- 红波点蝴蝶结 -->
+    <g transform="translate(98,30) rotate(12)">
+      <path d="M0 0 Q-14 -10 -15 0 Q-14 10 0 0 Z" fill="#e03434" stroke="#b02a2a" stroke-width="1.5"/>
+      <path d="M0 0 Q14 -10 15 0 Q14 10 0 0 Z" fill="#e03434" stroke="#b02a2a" stroke-width="1.5"/>
+      <circle r="4" fill="#e03434" stroke="#b02a2a" stroke-width="1.5"/>
+      <circle cx="-8" cy="-3" r="1.8" fill="#fff"/><circle cx="-5" cy="2" r="1.8" fill="#fff"/>
+      <circle cx="8" cy="-3" r="1.8" fill="#fff"/><circle cx="6" cy="3" r="1.8" fill="#fff"/>
+    </g>
+    ${face}${tears}
+    </g></svg>`;
+}
+function frogSVG(w){ // 奶蛙上帝真身
+  return `<svg viewBox="0 0 140 120" width="${w}" style="overflow:visible">
+    <ellipse cx="70" cy="70" rx="48" ry="36" fill="#ffe97a" stroke="#d8b030" stroke-width="3"/>
+    <circle cx="48" cy="42" r="16" fill="#ffe97a" stroke="#d8b030" stroke-width="3"/>
+    <circle cx="92" cy="42" r="16" fill="#ffe97a" stroke="#d8b030" stroke-width="3"/>
+    <circle cx="48" cy="42" r="8" fill="#2b2b2b"/><circle cx="92" cy="42" r="8" fill="#2b2b2b"/>
+    <circle cx="51" cy="39" r="3" fill="#fff"/><circle cx="95" cy="39" r="3" fill="#fff"/>
+    <path d="M50 78 Q70 92 90 78" stroke="#d8b030" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M20 60 Q8 52 14 42 M120 60 Q132 52 126 42" stroke="#ffe97a" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* ---------- 游戏状态 ---------- */
+const DAY_TICKS = 144;        // 一个游戏日 = 144 tick（现实约2分24秒）
+const S = {
+  mode:'god', linked:false,
+  ticks:0, day:1, mins:8*60, week:1,
+  money:200,
+  hy:{ hunger:80, energy:80, mood:80, hygiene:100, butt:0, health:100, psych:80, size:100,
+       grades:60, personality:'呆萌粘人', egg:false, eggDays:0 },
+  jl:{ unlocked:false, love:30 },
+  flags:{ fed:false, slept:false, studied:false, gamed:false, chatted:false, loved:false,
+          visited:false, pooped:false, wiped:false, poopChecked:false },
+  silly:[], suspicious:0, chaosLeft:0,
+};
+const $ = id=>document.getElementById(id);
+const rnd = a=>a[Math.floor(Math.random()*a.length)];
+const clamp = (v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+
+/* ---------- 音效 ---------- */
+let AC=null;
+function beep(f=600,d=.08,type='sine'){
+  try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type; o.frequency.value=f; g.gain.value=.08;
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+d);
+  }catch(e){}
+}
+
+/* ---------- 日志 / 气泡 / Toast ---------- */
+function timeStr(){ return String(Math.floor(S.mins/60)).padStart(2,'0')+':'+String(Math.round(S.mins%60)).padStart(2,'0'); }
+function feed(msg){
+  const d=document.createElement('div');
+  d.innerHTML=`<span class="t">D${S.day} ${timeStr()}</span>${msg}`;
+  const f=$('feed'); f.prepend(d); while(f.children.length>40) f.lastChild.remove();
+}
+function toast(msg){
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(),1800);
+}
+let bubbleTimer={};
+function bubble(who, txt, dur=4000){
+  const el = who==='hy'?$('bubbleHY'):$('bubbleJL');
+  el.textContent=txt; el.style.opacity=1;
+  clearTimeout(bubbleTimer[who]);
+  bubbleTimer[who]=setTimeout(()=>el.style.opacity=0,dur);
+}
+function hearts(x,y,n=5){
+  for(let i=0;i<n;i++){
+    const h=document.createElement('div'); h.className='heart'; h.textContent=rnd(['💗','💖','💕','🩷']);
+    h.style.left=(x+rnd([-20,0,20,40]))+'px'; h.style.top=y+'px';
+    document.body.appendChild(h); setTimeout(()=>h.remove(),1700);
+  }
+}
+/* ---------- 动作动画引擎 ---------- */
+function playAnim(who, anim, props, dur=2000){
+  const box = who==='hy'?$('boxHY'):$('boxJL');
+  if(anim){ box.classList.add(anim); setTimeout(()=>box.classList.remove(anim), dur); }
+  const stage=$('stage').getBoundingClientRect(), b=box.getBoundingClientRect();
+  (props||[]).forEach((p,i)=>{
+    const el=document.createElement('div'); el.className='prop'+(p.drop?' drop':''); el.textContent=p.t||p;
+    el.style.left=(b.left-stage.left + b.width/2 - 14 + (i*24-((props.length-1)*12)))+'px';
+    el.style.top =(b.top-stage.top + b.height*0.35)+'px';
+    el.style.animationDelay=(i*0.18)+'s';
+    $('stage').appendChild(el); setTimeout(()=>el.remove(), 2200+i*180);
+  });
+}
+function stageCenter(who){ const b = who==='hy'?$('boxHY'):$('boxJL'); const r=b.getBoundingClientRect(); return [r.left+r.width/2, r.top]; }
+
+/* ---------- 舞台内嵌操作坞（按键和动画同框，按了立刻看得见） ---------- */
+const DOCK={
+  care:[
+    ['🍚','actFeed','喂饭','green'], ['😴','actSleep','哄睡','blue'], ['📚','actStudy','上课',''],
+    ['💼','actWork','打工','gold'], ['🎮','actGame','游戏',''], ['🍔','actJunk','垃圾食品','gold'],
+    ['💬','actChatJL','找嘉琳','pink'],
+    ['🚄','actVisit','见嘉琳','green'], ['🏥','actHospital','医院','red'], ['🦄','actUnlock','养嘉琳','gold'],
+  ],
+  jl:[
+    ['💗','actLove','说爱','pink'], ['🖐','actSlap','打屁屁','red'], ['🧻','actWipe','擦屁屁','pink'],
+    ['💩','actPoop','监督拉屎',''], ['🔬','actCheckPoop','查💩','blue'], ['👅','actTongue','舌头模式','gold'],
+  ],
+  hy:[
+    ['📚','hyActStudy','学习','blue'], ['🎮','hyActGame','游戏',''], ['💌','hyActDate','约会','pink'],
+    ['🍔','hyActJunk','垃圾食品','gold'], ['🤗','hyActCuddle','求抱抱','pink'], ['🎁','hyActGift','送礼物','gold'],
+    ['👶','hyActMom','叫妈妈','pink'], ['🚽','hyActPoop','拉屎','red'],
+  ],
+};
+let dockPage='care';
+function renderDock(){
+  const godMode = S.mode==='god' || S.linked;
+  const hyMode = S.mode==='hy' || S.linked;
+  if((dockPage==='hy'&&!hyMode) || (dockPage!=='hy'&&!godMode)) dockPage = godMode? 'care':'hy';
+  document.querySelectorAll('#dockTabs .dtab').forEach(t=>{
+    const p=t.dataset.d;
+    t.style.display = (p==='hy'? hyMode : godMode)? '' : 'none';
+    t.classList.toggle('on', p===dockPage);
+  });
+  $('dockBtns').innerHTML = (DOCK[dockPage]||[]).map(([e,fn,n,c])=>
+    `<button class="dbtn ${c}" onclick="${fn}()" title="${n}">${e}<i>${n}</i></button>`).join('');
+}
+document.querySelectorAll('#dockTabs .dtab').forEach(t=>t.onclick=()=>{ dockPage=t.dataset.d; renderDock(); });
+
+/* ---------- 嘉琳&贺元 双人互动引擎：嘉琳真的走过去做动作，贺元像真人一样回应 ---------- */
+function fx(who, html, dur=2400){
+  const box=who==='hy'? $('boxHY') : $('boxJL');
+  const l=document.createElement('div'); l.className='fxLayer'; l.innerHTML=html;
+  box.appendChild(l);
+  setTimeout(()=>l.remove(), dur);
+}
+function jlint(o){
+  const dur=o.dur||1800;
+  let hySc=null, jlSc=null;
+  // 没解锁嘉琳时退化为单人动画（贺元自己的V2场景照常演）
+  if(!S.jl.unlocked){
+    if(o.onStart) hySc=o.onStart();
+    if(o.hyAnim) playAnim('hy', o.hyAnim, o.hyProps, dur);
+    if(o.hyLine) bubble('hy', o.hyLine, 3500);
+    setTimeout(()=>{ if(hySc) endScene(hySc); if(o.after) o.after(); }, dur+300);
+    return;
+  }
+  if(o.onStart) hySc=o.onStart();
+  const jb=$('boxJL');
+  jb.style.transform='translateX(-115px) translateY(-14px) rotate(-8deg)'; // 走到贺元跟前
+  playAnim('jl','anim-walk',null,700);
+  if(o.jlLine) bubble('jl', o.jlLine, 3200);
+  beep(700,.05);
+  if(o.onTick){ // 节拍钩子：动作进行中同步触发打击特效等
+    const t0=performance.now(), total=700+dur;
+    const tick=()=>{ const f=(performance.now()-t0)/total;
+      if(f>=1) return; o.onTick(f); requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }
+  setTimeout(()=>{ // 到位后：两人同时动起来
+    if(o.jlStart) jlSc=o.jlStart();
+    if(o.jlAnim) playAnim('jl', o.jlAnim, o.jlProps, dur);
+    if(o.hyAnim) playAnim('hy', o.hyAnim, o.hyProps, dur);
+    if(o.fxJL) fx('jl', o.fxJL, dur+400);
+    if(o.fxHY) fx('hy', o.fxHY, dur+400);
+    if(o.hyLine) bubble('hy', o.hyLine, 3800);
+    if(o.hearts){ const [x,y]=stageCenter('hy'); hearts(x,y,o.hearts); }
+    setTimeout(()=>{ // 演完收摊走回原位
+      if(hySc) endScene(hySc); if(jlSc) endScene(jlSc);
+      jb.style.transform='';
+      if(o.after) o.after();
+    }, dur+250);
+  }, 700);
+}
+
+/* ================= 动作引擎V2：手手脚脚会伸长会动 + 脸上有表情 ================= */
+const NSX='http://www.w3.org/2000/svg';
+const BODY={ // 立绘图片像素坐标锚点
+  hy:{W:1181,H:1076,skin:'#f6ebe2',
+    shL:[350,795],shR:[830,795],eyeL:[472,610],eyeR:[709,600],mouth:[614,705],
+    belly:[590,830],butt:[590,880],hipL:[500,930],hipR:[680,930],
+    footL:[470,1035],footR:[715,1035],head:[590,560]},
+  jl:{W:1028,H:1499,skin:'#f7ede6',
+    shL:[270,935],shR:[690,935],eyeL:[340,675],eyeR:[617,675],mouth:[483,825],
+    hipL:[420,1080],hipR:[560,1080],head:[490,600]},
+};
+S.fxPose={hy:'',jl:''};
+function pose(who,cls,dur){ // 给立绘摆姿势（render重绘时会自动补回）
+  S.fxPose[who]=cls;
+  const img=(who==='hy'?$('boxHY'):$('boxJL')).querySelector('.charPhoto img');
+  if(img) img.classList.add(cls);
+  setTimeout(()=>{ const im=(who==='hy'?$('boxHY'):$('boxJL')).querySelector('.charPhoto img');
+    if(im) im.classList.remove(cls); if(S.fxPose[who]===cls) S.fxPose[who]=''; }, dur);
+}
+function impact(who,pctX,pctY){ // 打击冲击波
+  const box=who==='hy'?$('boxHY'):$('boxJL');
+  const r=document.createElement('div'); r.className='impactRing';
+  r.style.left=pctX+'%'; r.style.top=pctY+'%';
+  box.appendChild(r); setTimeout(()=>r.remove(),500);
+}
+function faceGrp(who,expr){ // 脸部表情覆盖层（图片像素坐标）
+  const B=BODY[who];
+  const g=document.createElementNS(NSX,'g'); g.setAttribute('class','faceGrp');
+  const el=(tag,attrs)=>{ const e=document.createElementNS(NSX,tag);
+    for(const k in attrs) e.setAttribute(k,attrs[k]); return e; };
+  const patch=(c,rx,ry)=>el('ellipse',{cx:c[0],cy:c[1],rx,ry,fill:B.skin,opacity:.97});
+  const eyeArc=(c,dir,w=15)=>el('path',{d:`M ${c[0]-50} ${c[1]+dir*6} Q ${c[0]} ${c[1]-dir*46} ${c[0]+50} ${c[1]+dir*6}`,
+    stroke:'#3a2a20','stroke-width':w,fill:'none','stroke-linecap':'round'});
+  const eyePatch=(c)=>patch(c,80,98);
+  const eyeLens=(c)=>el('ellipse',{cx:c[0],cy:c[1],rx:48,ry:20,fill:'#2b2b2b'});
+  const xEye=(c)=>{ const gg=el('g',{});
+    gg.appendChild(el('path',{d:`M ${c[0]-40} ${c[1]-28} L ${c[0]+40} ${c[1]+28}`,stroke:'#3a2a20','stroke-width':14,'stroke-linecap':'round',fill:'none'}));
+    gg.appendChild(el('path',{d:`M ${c[0]-40} ${c[1]+28} L ${c[0]+40} ${c[1]-28}`,stroke:'#3a2a20','stroke-width':14,'stroke-linecap':'round',fill:'none'}));
+    return gg; };
+  const blush=(c,rx=58,op=.55)=>el('ellipse',{cx:c[0],cy:c[1],rx,ry:rx*.55,fill:'#ff8a8a',opacity:op});
+  const sweat=(c)=>{ const t=el('text',{x:c[0],y:c[1],'font-size':95,'text-anchor':'middle'}); t.textContent='💦'; return t; };
+  const mouthGrp=(inner,animCls)=>{ const m=el('g',{class:'mouthGrp'+(animCls?' '+animCls:'')});
+    inner.forEach(x=>m.appendChild(x)); return m; };
+  const mouthOpen=(c)=>mouthGrp([
+    el('ellipse',{cx:c[0],cy:c[1],rx:74,ry:92,fill:'#8e2626'}),
+    el('ellipse',{cx:c[0],cy:c[1]+34,rx:44,ry:36,fill:'#ff8f9e'}),
+    el('rect',{x:c[0]-52,y:c[1]-88,width:104,height:26,rx:10,fill:'#fff'}),
+  ],'mouth-chew');
+  const mouthO=(c)=>mouthGrp([el('ellipse',{cx:c[0],cy:c[1],rx:56,ry:76,fill:'#8e2626'})],'mouth-open2');
+  const smile=(c)=>mouthGrp([el('path',{d:`M ${c[0]-72} ${c[1]-8} Q ${c[0]} ${c[1]+72} ${c[0]+72} ${c[1]-8}`,
+    stroke:'#c03434','stroke-width':17,fill:'none','stroke-linecap':'round'})]);
+  const flat=(c)=>mouthGrp([el('path',{d:`M ${c[0]-56} ${c[1]} L ${c[0]+56} ${c[1]}`,
+    stroke:'#8a4a3a','stroke-width':14,fill:'none','stroke-linecap':'round'})]);
+  const wave=(c)=>mouthGrp([el('path',{d:`M ${c[0]-62} ${c[1]} Q ${c[0]-31} ${c[1]+22} ${c[0]} ${c[1]} Q ${c[0]+31} ${c[1]-22} ${c[0]+62} ${c[1]}`,
+    stroke:'#8a4a3a','stroke-width':13,fill:'none','stroke-linecap':'round'})]);
+  const [eL,eR,mo]=[B.eyeL,B.eyeR,B.mouth];
+  if(who==='hy'){
+    if(expr==='chomp'){ g.appendChild(eyePatch(eL)); g.appendChild(eyePatch(eR)); g.appendChild(eyeArc(eL,1)); g.appendChild(eyeArc(eR,1)); g.appendChild(mouthOpen(mo)); }
+    else if(expr==='happy'){ g.appendChild(eyePatch(eL)); g.appendChild(eyePatch(eR)); g.appendChild(eyeArc(eL,1)); g.appendChild(eyeArc(eR,1)); g.appendChild(smile(mo)); g.appendChild(blush([eL[0]-10,eL[1]+120])); g.appendChild(blush([eR[0]+10,eR[1]+120])); }
+    else if(expr==='closed'){ g.appendChild(eyePatch(eL)); g.appendChild(eyePatch(eR)); g.appendChild(eyeArc(eL,-1)); g.appendChild(eyeArc(eR,-1)); g.appendChild(flat(mo)); }
+    else if(expr==='focus'){ g.appendChild(eyePatch(eL)); g.appendChild(eyePatch(eR)); g.appendChild(eyeLens(eL)); g.appendChild(eyeLens(eR)); g.appendChild(flat(mo)); g.appendChild(sweat([eL[0]-90,eL[1]-130])); }
+    else if(expr==='tired'){ g.appendChild(eyePatch(eL)); g.appendChild(eyePatch(eR)); g.appendChild(eyeLens(eL)); g.appendChild(eyeLens(eR)); g.appendChild(wave(mo)); g.appendChild(sweat([eR[0]+90,eR[1]-130])); }
+    else if(expr==='strain'){ g.appendChild(eyePatch(eL)); g.appendChild(eyePatch(eR)); g.appendChild(xEye(eL)); g.appendChild(xEye(eR)); g.appendChild(blush(mo,70,.6)); g.appendChild(wave(mo)); }
+    else if(expr==='pain'){ g.appendChild(eyePatch(eL)); g.appendChild(eyePatch(eR)); g.appendChild(xEye(eL)); g.appendChild(xEye(eR)); g.appendChild(mouthO(mo)); g.appendChild(sweat([eL[0]-90,eL[1]-130])); }
+    else if(expr==='shy'){ g.appendChild(eyePatch(eL)); g.appendChild(eyePatch(eR)); g.appendChild(eyeArc(eL,1)); g.appendChild(eyeArc(eR,1)); g.appendChild(blush([eL[0]-6,eL[1]+115],66,.7)); g.appendChild(blush([eR[0]+6,eR[1]+115],66,.7)); g.appendChild(wave(mo)); }
+    else if(expr==='wow'){ g.appendChild(mouthO(mo)); }
+  }else{
+    if(expr==='happy'){ g.appendChild(smile(mo)); g.appendChild(blush([eL[0]-14,eL[1]+120],60,.6)); g.appendChild(blush([eR[0]+14,eR[1]+120],60,.6)); }
+    else if(expr==='closed'){ g.appendChild(eyeArc(eL,-1)); g.appendChild(eyeArc(eR,-1)); }
+    else if(expr==='strict'){ g.appendChild(el('path',{d:`M ${eL[0]-50} ${eL[1]-100} L ${eL[0]+40} ${eL[1]-70}`,stroke:'#3a2a20','stroke-width':15,fill:'none','stroke-linecap':'round'}));
+      g.appendChild(el('path',{d:`M ${eR[0]+50} ${eR[1]-100} L ${eR[0]-40} ${eR[1]-70}`,stroke:'#3a2a20','stroke-width':15,fill:'none','stroke-linecap':'round'}));
+      g.appendChild(flat(mo)); }
+  }
+  return g;
+}
+function limbLayer(who,dur){ // 创建肢体层：手/脚伸长移动动画引擎
+  const box=who==='hy'?$('boxHY'):$('boxJL');
+  const B=BODY[who];
+  const svg=document.createElementNS(NSX,'svg');
+  svg.setAttribute('viewBox',`0 0 ${B.W} ${B.H}`);
+  svg.setAttribute('preserveAspectRatio','none');
+  svg.classList.add('limbSvg');
+  box.appendChild(svg);
+  const ctx={who,box,B,svg,dur,t0:performance.now(),limbs:[],done:false,raf:null};
+  ctx.ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+  ctx.keyAt=(keys,t)=>{ if(t<=keys[0].t) return keys[0].to;
+    for(let i=0;i<keys.length-1;i++){ const a=keys[i],b=keys[i+1];
+      if(t<=b.t){ const f=ctx.ease((t-a.t)/((b.t-a.t)||1));
+        return [a.to[0]+(b.to[0]-a.to[0])*f, a.to[1]+(b.to[1]-a.to[1])*f]; } }
+    return keys[keys.length-1].to; };
+  ctx.limb=(kind,from,keys,opts={})=>{
+    const arm=kind==='arm';
+    const g=document.createElementNS(NSX,'g');
+    const oPath=el2('path',{stroke:'#caa07a','stroke-width':arm?32:25,fill:'none','stroke-linecap':'round'});
+    const iPath=el2('path',{stroke:B.skin,'stroke-width':arm?24:18,fill:'none','stroke-linecap':'round'});
+    const hand=el2('g',{});
+    hand.appendChild(el2('ellipse',{rx:arm?30:24,ry:arm?24:19,fill:B.skin,stroke:'#caa07a','stroke-width':4}));
+    if(opts.hand){ const t=el2('text',{y:8,'font-size':56,'text-anchor':'middle'}); t.textContent=opts.hand; hand.appendChild(t); }
+    g.appendChild(oPath); g.appendChild(iPath); g.appendChild(hand); svg.appendChild(g);
+    const limb={oPath,iPath,hand,from,keys,opts}; ctx.limbs.push(limb); return limb;
+  };
+  ctx.face=(expr)=>svg.appendChild(faceGrp(who,expr)); // 表情覆盖层
+  ctx.loop=()=>{ if(ctx.done) return;
+    const f=Math.min(1,(performance.now()-ctx.t0)/ctx.dur);
+    ctx.limbs.forEach(l=>{
+      const to=ctx.keyAt(l.keys,f);
+      const [sx,sy]=l.from,[tx,ty]=to;
+      const dx=tx-sx,dy=ty-sy,dd=Math.hypot(dx,dy)||1;
+      const bend=l.opts.bend!=null?l.opts.bend:Math.min(70,dd*.14);
+      const cx=(sx+tx)/2-dy/dd*bend, cy=(sy+ty)/2+dx/dd*bend;
+      const d=`M ${sx} ${sy} Q ${cx} ${cy} ${tx} ${ty}`;
+      l.oPath.setAttribute('d',d); l.iPath.setAttribute('d',d);
+      l.hand.setAttribute('transform',`translate(${tx},${ty})`);
+    });
+    ctx.raf=requestAnimationFrame(ctx.loop); };
+  ctx.loop();
+  return ctx;
+}
+function el2(tag,attrs){ const e=document.createElementNS(NSX,tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function endScene(sc){ sc.done=true; if(sc.raf) cancelAnimationFrame(sc.raf); sc.svg.remove(); }
+function osc(to,n,amp,dt=.09){ // 生成抖动关键帧（打打打/擦擦擦）
+  const keys=[{t:0,to}];
+  for(let i=1;i<=n;i++){ const s=i%2?-1:1;
+    keys.push({t:i*dt,to:[to[0],to[1]+s*amp]}); }
+  return keys;
+}
+function deny(msg){ // 按键被条件拦下时：气泡+摇头+音效，绝不无声无息
+  toast(msg); bubble('hy', rnd(['呜……好吧','（耸拉耳朵）','哦……','（低头）知道了……']),2200);
+  playAnim('hy','anim-shake',null,700); beep(180,.08,'square');
+}
+
+
+function exprOf(){
+  const h=S.hy;
+  if(h.egg) return 'egg';
+  if(S.flags.sleeping) return 'sleep';
+  if(h.health<30) return 'sick';
+  if(h.mood<30||h.hunger<20) return 'cry';
+  if(h.mood<55||h.psych<40) return 'sad';
+  if(h.mood>85) return 'wow';
+  return 'normal';
+}
+function sizeScale(){ return S.hy.egg? .35 : Math.max(.3, S.hy.size/100); }
+
+/* ---------- 立绘照片渲染（原图直贴+状态叠加） ---------- */
+function photoHTML(src, ex, size, buttRed){
+  const w = Math.round(196*size);
+  let ov='', filt='';
+  if(ex==='cry'){ ov=`<span class="ov" style="left:14%;top:36%">😢</span><span class="ov" style="left:64%;top:36%">😢</span>`; filt='filter:saturate(.7);'; }
+  else if(ex==='sleep'){ ov=`<span class="ov" style="left:16%;top:30%">😴</span><span class="ov" style="left:55%;top:18%">💤</span><span class="ov" style="left:78%;top:34%">💤</span>`; filt='filter:brightness(.9);'; }
+  else if(ex==='sick'){ ov=`<span class="ov" style="left:4%;top:52%">🤒</span>`; filt='filter:saturate(.5) brightness(.95);'; }
+  else if(ex==='sad'){ filt='filter:saturate(.55) brightness(.95);'; }
+  else if(ex==='wow'){ ov=`<span class="ov" style="left:6%;top:24%">✨</span><span class="ov" style="left:82%;top:20%">✨</span>`; }
+  return `<div class="charPhoto" style="width:${w}px">
+    <img src="${src}" draggable="false" style="${filt}">
+    ${buttRed?'<div class="buttRed"></div>':''}${ov}
+  </div>`;
+}
+function hyPhoto(ex, size, buttRed){ return photoHTML('heyuan.png', ex, size, buttRed); }
+function jlPhoto(ex){ return photoHTML('jialin.png', ex, 0.75, false); }
+
+let pkHY='', pkJL='';
+function render(){
+  const h=S.hy, ex=exprOf();
+  const keyHY=ex+'|'+sizeScale().toFixed(2)+'|'+(h.butt>40);
+  if(keyHY!==pkHY){ // 状态变化才重建立绘（动画层不会被每秒tick干掉）
+    pkHY=keyHY;
+    if(ex==='egg'){
+      $('svgHY').innerHTML=`<svg viewBox="0 0 140 190" width="196" height="196" style="overflow:visible">
+        <ellipse cx="70" cy="160" rx="46" ry="8" fill="#fff" opacity=".5"/>
+        <ellipse cx="70" cy="120" rx="42" ry="52" fill="#fff8ee" stroke="#d8b08a" stroke-width="3"/>
+        <ellipse cx="55" cy="100" rx="12" ry="18" fill="#fff" opacity=".8"/>
+        <circle cx="60" cy="120" r="5" fill="#2b2b2b"/><circle cx="80" cy="120" r="5" fill="#2b2b2b"/>
+        <path d="M62 136 Q70 130 78 136" stroke="#b06a5a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="44" cy="132" rx="6" ry="4" fill="#ffc9d6" opacity=".8"/><ellipse cx="96" cy="132" rx="6" ry="4" fill="#ffc9d6" opacity=".8"/>
+        <text x="70" y="186" text-anchor="middle" font-size="12" font-weight="900" fill="#c98a6a">受精卵…说爱 ${5-(h.eggLove||0)} 次就孵化</text>
+      </svg>`;
+    }else{
+      $('svgHY').innerHTML = hyPhoto(ex, sizeScale(), h.butt>40);
+      if(S.fxPose.hy){ const im=$('boxHY').querySelector('.charPhoto img'); if(im) im.classList.add(S.fxPose.hy); }
+    }
+  }
+  $('nameHY').textContent = S.hy.egg? '贺元卵' : '贺元';
+  // 小嘉琳
+  if(S.jl.unlocked){
+    $('boxJL').style.display='';
+    $('loveBar').style.display='';
+    const jlEx = S.jl.love>70?'wow':(S.jl.love>40?'normal':'sad');
+    const keyJL=jlEx+'|0.75';
+    if(keyJL!==pkJL){
+      pkJL=keyJL;
+      $('svgJL').innerHTML = jlPhoto(jlEx);
+      if(S.fxPose.jl){ const im=$('boxJL').querySelector('.charPhoto img'); if(im) im.classList.add(S.fxPose.jl); }
+    }
+    $('loveFill').style.width = S.jl.love+'%';
+  }else{ pkJL=''; }
+  // 状态条
+  const rows = [
+    ['🍚 饱食',h.hunger,'#ffb36b'], ['😴 精力',h.energy,'#7db8e8'], ['😊 心情',h.mood,'#ff7eb9'],
+    ['🧻 屁股卫生',h.hygiene,'#c9a3e8'], ['❤️ 健康',h.health,'#e86a6a'], ['🧠 心理',h.psych,'#6ac0e8'],
+    ['📏 体型',h.size,'#9fd894'], ['📚 成绩',h.grades,'#e8c465'],
+  ];
+  if(h.butt>0) rows.splice(4,0,['🔴 屁股红度',h.butt,'#ff6b6b']);
+  if(S.jl.unlocked) rows.push(['💗 嘉琳忠诚度',S.jl.love,'#ff5ca0']);
+  if(S.mode==='hy') rows.unshift(['😈 蔫坏值',S.suspicious,'#a86ae8']);
+  $('statList').innerHTML = rows.map(([n,v,c])=>
+    `<div class="stat"><span class="lbl">${n}</span><div class="bar"><i style="width:${v}%;background:${c}"></i></div><span class="val">${Math.round(v)}%</span></div>`).join('');
+  $('stageTag').textContent = h.egg? '受精卵危机' : h.health<30?'生病中🤒' : h.mood<30?'呜呜大哭' : h.size<60?'瘦小了…' : h.mood>85?'开心到飞起':'健康幼崽';
+  $('uiMoney').textContent = Math.round(S.money);
+  $('uiDay').textContent = S.day; $('uiWeek').textContent = S.week; $('uiTime').textContent = timeStr();
+  $('loveWarn').style.display = S.flags.loved?'none':'';
+  $('weekWarn').textContent = S.flags.visited? '✅ 本周已经去找过嘉琳啦，乖。' : '💡 本周还没去找嘉琳哦，不去他会伤心！';
+  $('weekWarn').style.color = S.flags.visited? '#7fbf6f':'';
+  renderDock();
+  // 模式界面
+  const godMode = S.mode==='god' || S.linked;
+  const hyMode = S.mode==='hy' || S.linked;
+  document.querySelector('#page-care').style.display = godMode?'':'none';
+  document.querySelector('#page-jl').style.display = godMode?'':'none';
+  document.querySelector('#page-hy').style.display = hyMode?'':'none';
+  $('hyTag').textContent = S.linked? '双人联机中' : (S.mode==='hy'?'上帝在看着你':'双人联机中');
+  $('modeSwitch').textContent = S.linked? '❌ 退出双人联机' : (S.mode==='god'? '🎮 切换小贺元模式' : '🫡 切回上帝模式');
+}
+
+/* ---------- 台词库 ---------- */
+const PERSONALITY = {
+  '呆萌粘人':{ echoP:.5, say:(t)=>'真的吗真的吗？'+t, lines:['嘉琳最好了🥺','我什么都听嘉琳的！','嘿嘿，嘉琳看我！','今天也超想嘉琳！','我会乖乖的！'] },
+  '叛逆嘴硬':{ echoP:.3, say:(t)=>'哼、哼……'+t+'……也不是不行', lines:['谁、谁想你了！','才没有想你呢','……就摸一下下','我根本没哭！是汗！','哦。'] },
+  '戏精附体':{ echoP:.4, say:(t)=>'呜呜呜！！'+t+'！！（晕倒）', lines:['啊——我的天哪！！','这个世界容不下我了！','（扑通跪地）嘉琳！','我宣布：我是最惨的！','（背过身抽泣）'] },
+  '舔狗本狗':{ echoP:.2, say:(t)=>'嘉琳说的都对！'+t, lines:['嘉琳！嘉琳！嘉琳！','能为嘉琳拉屎是我的荣幸','嘉琳指哪我打哪','今天也是舔狗的一天🐶','嘉琳的屁屁……啊不是，嘉琳最美！'] },
+};
+function hyTalk(extra){
+  const p=PERSONALITY[S.hy.personality];
+  bubble('hy', extra || rnd(p.lines));
+  beep(rnd([500,600,700]),.06);
+}
+
+/* ---------- 核心行为 ---------- */
+function cost(act){ /* 动作都消耗游戏时间 */ S.mins += 30; tickCheck(true); }
+function hourNow(){ return Math.floor(S.mins/60)%24; }
+function isNight(){ const hh=hourNow(); return hh>=23||hh<6; }
+function actFeed(){ const h=S.hy;
+  if(h.egg){ deny('他在当受精卵，只能靠说爱他来孵化！'); return; }
+  if(S.money<5){ deny('米缸见底了！先让贺元打工挣饭钱（每顿¥5）'); return; }
+  if(h.hunger>92){ deny('他撑得直打嗝，再喂要积食了！'); return; }
+  S.money-=5; S.meals=(S.meals||0)+1;
+  h.hunger=clamp(h.hunger+40); h.energy=clamp(h.energy+10); h.mood=clamp(h.mood+8);
+  h.health=clamp(h.health+5);
+  h.size=clamp(h.size+3); // 吃饭长身体：健康+5，体型+3%
+  S.flags.fed=true; feed(`🍚 花¥5投喂爱心便当（健康+5，体型+3%，越长越大！）`);
+  // ===== V2编舞：贺元张嘴大吃，嘉琳（若有）伸手喂，吃完摸肚子跳舞 =====
+  pose('hy','pose-lean',2400);
+  const sc=limbLayer('hy',2400);
+  sc.face('chomp'); // 嘴巴一张一合咀嚼
+  // 手臂端着往嘴边送
+  sc.limb('arm',BODY.hy.shR,osc([BODY.hy.mouth[0]+95,BODY.hy.mouth[1]+120],5,10,.1),{hand:'🥢'});
+  const jlCtx = S.jl.unlocked? limbLayer('jl',2400) : null;
+  if(jlCtx){ jlCtx.face('happy');
+    jlCtx.limb('arm',BODY.jl.shR,osc([BODY.jl.mouth[0]+180,BODY.jl.mouth[1]+160],5,12,.1),{hand:'🍚',side:-1});
+    pose('jl','pose-lean',2400); }
+  fx('hy','<span class="poopFall" style="left:44%;top:30%">🍚</span>',1500);
+  hyTalk(rnd(['咔哧咔哧！','好吃到跺jiojio！','还想再吃一碗！']));
+  setTimeout(()=>{ if(!S.flags.sleeping && !h.egg){ // 吃完：摸肚子+开心跳
+    const sc2=limbLayer('hy',2200); sc2.face('happy');
+    sc2.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.belly[0]+60,BODY.hy.belly[1]-40]},{t:.5,to:BODY.hy.belly},{t:1,to:[BODY.hy.belly[0]+60,BODY.hy.belly[1]-40]}],{hand:''});
+    pose('hy','pose-jump2',1600);
+    bubble('hy', rnd(['嗝——吃饱了！','嘉琳喂的饭最香！','（摸摸圆肚子）满足~']),3000);
+    setTimeout(()=>{ endScene(sc2); playAnim('hy','anim-dance',null,1500); },1600);
+  } },2400);
+  setTimeout(()=>{ endScene(sc); if(jlCtx){ endScene(jlCtx); pose('jl','pose-lean',1); } },2400);
+  if(S.meals>=2 && !S.flags.pooped) feed('💡 吃饱了容易有便意，记得监督他拉屎');
+  beep(700); cost();
+}
+function actSleep(){ const h=S.hy;
+  if(S.flags.sleeping){ S.flags.sleeping=false; h.energy=100; feed('🌤️ 贺元睡醒了，精力回满！（睡醒=满血复活）');
+    const sc=limbLayer('hy',1600); sc.face('happy'); sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+120,BODY.hy.shR[1]-120]}],{hand:''});
+    pose('hy','pose-jump2',1200); hyTalk('哈——睡饱啦！满血复活！');
+    setTimeout(()=>endScene(sc),1600); render(); return; }
+  S.flags.sleeping=true; S.flags.slept=true;
+  h.health=clamp(h.health+8); h.size=clamp(h.size+2); // 哄睡加健康，睡觉长身体
+  if(isNight()){ h.energy=100; feed('😴 深夜哄睡，一觉到天亮：精力直接回满！（健康+8，体型+2%）'); }
+  else{ h.energy=clamp(h.energy+55); feed('😐 白天补觉睡了个饱觉：精力+55（健康+8，体型+2%）'); }
+  S.sleepQuality = isNight()? 2 : 1;
+  // V2编舞：整个人躺平+闭眼+盖被子
+  pose('hy','pose-lie',5000);
+  const sc=limbLayer('hy',4000); sc.face('closed');
+  fx('hy','<span style="position:absolute;left:8%;bottom:34%;font-size:44px;animation:grassIn .5s ease backwards">🛏️</span><span class="pantsDrop" style="left:30%;bottom:20%;font-size:40px">🧸</span>',4000);
+  playAnim('hy','anim-doze',['💤','💤'],3000);
+  bubble('hy','zZZ……'); cost();
+  setTimeout(()=>{ if(S.flags.sleeping) bubble('hy', rnd(['（说梦话）嘉琳……别走……','（说梦话）再吃一碗……','（翻了个身，嘴角上扬）']),3000); },4000);
+  setTimeout(()=>{ endScene(sc); },4200);
+  render();
+}
+function actGame(){ const h=S.hy;
+  if(h.egg){ deny('受精卵不会打游戏！'); return; }
+  if(S.flags.sleeping){ deny('他睡得正香呢！再点一次哄睡把他叫醒！'); return; }
+  if(h.energy<20){ deny('他累到握不动手柄了，先睡觉！'); return; }
+  h.energy=clamp(h.energy-15); h.mood=clamp(h.mood+18); h.grades=clamp(h.grades-4);
+  if(isNight()){ h.health=clamp(h.health-8); feed('🎮 贺元熬夜打游戏，第二天黑眼圈加深（健康-8）'); }
+  else feed('🎮 贺元打游戏爽了一把（成绩-4）');
+  S.flags.gamed=true;
+  // ===== V2编舞：盘腿坐下来，双手伸长拿游戏机按按按，全神贯注 =====
+  pose('hy','pose-sit',3600);
+  const sc=limbLayer('hy',3400);
+  sc.face('focus');
+  // 盘腿：两条腿交叉收到身前
+  sc.limb('leg',BODY.hy.hipL,[{t:0,to:BODY.hy.footL},{t:.25,to:[640,1000]},{t:1,to:[640,1000]}]);
+  sc.limb('leg',BODY.hy.hipR,[{t:0,to:BODY.hy.footR},{t:.25,to:[545,1005]},{t:1,to:[545,1005]}]);
+  // 双手伸到身前握手柄，拇指狂按
+  sc.limb('arm',BODY.hy.shL,osc([575,860],9,9,.07),{hand:'',side:1});
+  sc.limb('arm',BODY.hy.shR,osc([665,860],9,9,.07),{hand:'🎮',side:-1});
+  fx('hy','<span class="poopFall" style="left:50%;top:52%">🎮</span>',1200);
+  hyTalk('最后一局！真的是最后一局！');
+  setTimeout(()=>{ if(S.flags.sleeping) return; // 赢了：跳起来双手举高
+    const sc2=limbLayer('hy',1600); sc2.face('wow');
+    sc2.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.mouth[0]-40,BODY.hy.mouth[1]+180]},{t:.4,to:[BODY.hy.shL[0]-30,BODY.hy.head[1]-160]},{t:1,to:[BODY.hy.shL[0]-30,BODY.hy.head[1]-160]}],{hand:''});
+    sc2.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.mouth[0]+40,BODY.hy.mouth[1]+180]},{t:.4,to:[BODY.hy.shR[0]+30,BODY.hy.head[1]-160]},{t:1,to:[BODY.hy.shR[0]+30,BODY.hy.head[1]-160]}],{hand:'✨'});
+    pose('hy','pose-jump2',1500);
+    bubble('hy', rnd(['赢了赢了！我是大神！','（嚣张跺jio）就这？','再来亿局！']),3000);
+    playAnim('hy','anim-jump',['✨','🔥'],1500);
+    const [x,y]=stageCenter('hy'); hearts(x,y,4);
+    setTimeout(()=>endScene(sc2),1600);
+  },3400);
+  setTimeout(()=>endScene(sc),3400);
+  if(Math.random()<0.35) setTimeout(()=>{ if(!S.flags.sleeping) frogSpank('熬夜打游戏'); },4400); // 奶蛙抓包
+  beep(880,.05,'square'); cost();
+}
+function actStudy(){ const h=S.hy;
+  if(h.egg){ deny('受精卵上不了课！'); return; }
+  if(isNight()){ deny('都几点了还上课？脑子根本不转，先睡觉！'); return; }
+  if(S.flags.sleeping){ deny('他睡得正香呢！再点一次哄睡把他叫醒！'); return; }
+  if(h.energy<20){ deny('他困得睁不开眼，先睡觉！'); return; }
+  if(h.hunger<20){ deny('饿着肚子学不进去，先喂饭！'); return; }
+  h.energy=clamp(h.energy-12); h.mood=clamp(h.mood-6);
+  h.size=clamp(h.size-2); // 上课费脑子，会累瘦
+  const gain = h.hunger<40? 4 : 8;
+  h.grades=clamp(h.grades+gain);
+  S.flags.studied=true; feed(`📚 贺元去上课了（成绩+${gain}，但累瘦了：体型-2%）`);
+  // V2编舞：坐姿+一手扶书一手伸长拿笔写字圈圈，专注脸+汗，最后瘫倒
+  pose('hy','pose-sit',4200);
+  const sc=limbLayer('hy',4200);
+  sc.face('focus');
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-60,BODY.hy.shL[1]-180]},{t:1,to:[BODY.hy.shL[0]-60,BODY.hy.shL[1]-180]}],{hand:'📚',side:1});
+  // 写字：手在小范围画圈抖动
+  const wr=[BODY.hy.mouth[0]+130,BODY.hy.mouth[1]+300];
+  const wkeys=[{t:0,to:[BODY.hy.shR[0],BODY.hy.shR[1]-40]},{t:.15,to:wr}];
+  for(let i=1;i<=8;i++){ const a=i*0.8;
+    wkeys.push({t:.15+i*.07,to:[wr[0]+Math.cos(a)*26, wr[1]+Math.sin(a)*16]}); }
+  wkeys.push({t:1,to:wr});
+  sc.limb('arm',BODY.hy.shR,wkeys,{hand:'✏️',side:-1});
+  fx('hy','<span class="toiletPop" style="left:4%;bottom:30%;font-size:42px">📖</span><span class="toiletPop" style="right:4%;bottom:30%;font-size:40px">🪑</span>',3200);
+  hyTalk(rnd(['信号与系统……呜','学废了学废了','老师我叫郑贺元！']));
+  setTimeout(()=>{ if(S.flags.sleeping||h.egg) return; // 下课瘫倒
+    const sc2=limbLayer('hy',1400); sc2.face('tired');
+    sc2.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.mouth[0]+130,BODY.hy.mouth[1]+300]},{t:.5,to:[BODY.hy.mouth[0]+40,BODY.hy.mouth[1]+220]}],{hand:''});
+    pose('hy','pose-bend',1300);
+    bubble('hy', rnd(['（瘫在桌上）脑子被掏空……','好多作业……饿前胸贴后背','（打哈欠）好困……']),3000);
+    setTimeout(()=>endScene(sc2),1400);
+  },4200);
+  setTimeout(()=>endScene(sc),4200);
+  beep(520); cost();
+}
+function actChatJL(){ const h=S.hy;
+  if(!S.jl.unlocked){ deny('还没解锁小嘉琳哦～攒够¥520！'); return; }
+  h.mood=clamp(h.mood+15); S.jl.love=clamp(S.jl.love+6); S.flags.chatted=true;
+  feed('💬 贺元和小嘉琳面对面贴贴聊天');
+  // V2编舞：嘉琳走过来，两人互相拉手聊天，贺元激动挥手
+  jlint({ jlLine:rnd(['小元仔~','今天有没有乖乖的？','想你啦💞','记得吃饭！','嘿嘿，笨蛋贺元']),
+    dur:2600,
+    onStart:()=>{
+      pose('hy','pose-lean',2600);
+      const sc=limbLayer('hy',2600); sc.face('happy');
+      sc.limb('arm',BODY.hy.shR,osc([BODY.hy.mouth[0]+180,BODY.hy.mouth[1]+60],6,26,.11),{hand:'',side:-1});
+      return sc;
+    },
+    jlStart:()=>{
+      pose('jl','pose-lean',2600);
+      const sc=limbLayer('jl',2600); sc.face('happy');
+      sc.limb('arm',BODY.jl.shL,[{t:0,to:[BODY.jl.mouth[0]-150,BODY.jl.mouth[1]+220]}],{hand:'',side:1});
+      return sc;
+    },
+    hyLine:rnd(['在的在的！','我最乖了！','爱你！！','马上汇报行踪！']),
+    hearts:4,
+    after:()=>{ if(!S.flags.sleeping){ bubble('hy','（还不想让她走）再聊五分钟嘛……',3000); playAnim('hy','anim-nod',null,1200);} }});
+  beep(760); cost();
+}
+function actWork(){ const h=S.hy;
+  if(isNight()){ deny('凌晨没人招工！打工要白天去（6:00-22:00）'); return; }
+  if(S.flags.sleeping){ deny('他睡得正香呢！再点一次哄睡把他叫醒！'); return; }
+  if(h.energy<25){ deny('他累趴了，挣不了钱，先睡觉！'); return; }
+  if(h.health<30){ deny('病成这样哪个老板敢要他！先去医院！'); return; }
+  if(h.hunger<15){ deny('饿得没力气搬砖，先喂饭！'); return; }
+  let pay = Math.round((40 + h.grades*0.6 + Math.random()*20) * (h.psych<40? .5 : 1));
+  if(h.psych<40) feed('💔 贺元心事重重（没人说爱他），上班魂不守舍被扣了一半工资');
+  h.energy=clamp(h.energy-25); h.hunger=clamp(h.hunger-12); S.money+=pay;
+  h.size=clamp(h.size-3); // 打工搬砖累瘦
+  feed(`💼 贺元打工挣了 ¥${pay}（成绩越好挣越多，但搬砖累瘦：体型-3%）`);
+  // ===== V2编舞：弯腰搬砖→扛起就走来回两趟→领纸币举手里数钱 =====
+  pose('hy','pose-bend2',1800); // 第一趟：弯腰搬
+  const sc=limbLayer('hy',1800);
+  sc.face('focus');
+  sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+40,BODY.hy.shR[1]-20]},{t:.5,to:[BODY.hy.butt[0]+130,BODY.hy.butt[1]+150]},{t:1,to:[BODY.hy.butt[0]+90,BODY.hy.butt[1]-60]}],{hand:'🧱',side:-1});
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-40,BODY.hy.shL[1]-20]},{t:.5,to:[BODY.hy.butt[0]-90,BODY.hy.butt[1]+150]},{t:1,to:[BODY.hy.butt[0]-40,BODY.hy.butt[1]-60]}],{hand:'🧱',side:1});
+  fx('hy','<span class="toiletPop" style="right:-4%;bottom:6%;font-size:46px">🧱</span>',1700);
+  setTimeout(()=>{ if(S.flags.sleeping) return; // 扛起砖走两趟
+    pose('hy','pose-strut',2600);
+    const sc2=limbLayer('hy',2600);
+    sc2.face('tired');
+    sc2.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+30,BODY.hy.head[1]-140]},{t:1,to:[BODY.hy.shR[0]+30,BODY.hy.head[1]-140]}],{hand:'🧱',side:-1});
+    sc2.limb('leg',BODY.hy.hipL,[{t:0,to:BODY.hy.footL},{t:.15,to:[BODY.hy.footL[0]-60,BODY.hy.footL[1]-70]},{t:.3,to:BODY.hy.footL},{t:.45,to:[BODY.hy.footL[0]-60,BODY.hy.footL[1]-70]},{t:.6,to:BODY.hy.footL},{t:.75,to:[BODY.hy.footL[0]-60,BODY.hy.footL[1]-70]},{t:.9,to:BODY.hy.footL}]);
+    sc2.limb('leg',BODY.hy.hipR,[{t:0,to:BODY.hy.footR},{t:.15,to:BODY.hy.footR},{t:.3,to:[BODY.hy.footR[0]+60,BODY.hy.footR[1]-70]},{t:.45,to:BODY.hy.footR},{t:.6,to:[BODY.hy.footR[0]+60,BODY.hy.footR[1]-70]},{t:.75,to:BODY.hy.footR},{t:.9,to:[BODY.hy.footR[0]+60,BODY.hy.footR[1]-70]}]);
+    fx('hy','<span style="position:absolute;left:12%;bottom:36%;font-size:38px;animation:grassIn .4s ease backwards">🏗️</span>',2600);
+    bubble('hy','搬砖中……勿cue',2000);
+    setTimeout(()=>{ if(S.flags.sleeping) return; // 发工资：接纸币+数钱脸
+      pose('hy','pose-lean',1800);
+      const sc3=limbLayer('hy',1800);
+      sc3.face('happy');
+      sc3.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+40,BODY.hy.shR[1]-20]},{t:.4,to:[BODY.hy.mouth[0]+150,BODY.hy.mouth[1]+40]},{t:1,to:[BODY.hy.mouth[0]+150,BODY.hy.mouth[1]+40]}],{hand:'💵',side:-1});
+      playAnim('hy',null,['💵','💰','💴'],1800);
+      bubble('hy',`挣了${pay}块！都给嘉琳花！`,3000);
+      setTimeout(()=>{ endScene(sc3); pose('hy','pose-twisty',1200); playAnim('hy','anim-dance',null,1400); },1800);
+    },2600);
+    setTimeout(()=>endScene(sc2),2600);
+  },1800);
+  setTimeout(()=>endScene(sc),1800);
+  setTimeout(()=>{ if(!S.flags.sleeping) bubble('hy', rnd(['（腰都直不起来了）好累……','搬砖一天，瘦了三圈','但我心甘情愿！']),3000); },6600);
+  beep(980,.06); cost();
+}
+function actHospital(){
+  if(S.money<88){ deny('钱不够！挂号+药费一共 ¥88'); return; }
+  S.money-=88; const h=S.hy;
+  h.health=100; h.hygiene=clamp(h.hygiene+20); h.psych=clamp(h.psych+10); h.mood=clamp(h.mood+10);
+  feed('🏥 贺元被送进医院，打针吃药后痊愈出院（-¥88）');
+  // V2编舞：躺病床上，手伸长接点滴，苦着脸
+  pose('hy','pose-lie',4200);
+  const sc=limbLayer('hy',4200);
+  sc.face('strain');
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-80,BODY.hy.shL[1]-40]},{t:1,to:[BODY.hy.shL[0]-80,BODY.hy.shL[1]-40]}],{hand:'💉',side:1});
+  fx('hy','<span class="toiletPop" style="left:-2%;top:6%;font-size:48px">🏥</span><span class="poopFall" style="left:40%;top:20%">💊</span>',3200);
+  hyTalk('医院的饭好难吃……但是活过来了！');
+  setTimeout(()=>{ endScene(sc); pose('hy','pose-jump2',1000);
+    const sc2=limbLayer('hy',1200); sc2.face('happy');
+    sc2.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+30,BODY.hy.head[1]-140]}],{hand:''});
+    setTimeout(()=>endScene(sc2),1200);
+  },4200);
+  beep(660); cost();
+}
+function actUnlock(){ 
+  if(S.jl.unlocked){ deny('已经有小嘉琳啦！'); return; }
+  if(S.money<520){ deny(`还差 ¥${520-Math.round(S.money)} 才能解锁小嘉琳（¥520）`); return; }
+  S.money-=520; S.jl.unlocked=true; S.jl.love=30;
+  feed('🦄 花费 ¥520 解锁了小嘉琳！贺元乐疯了');
+  bubble('jl','你好呀，我是小嘉琳🌷',5000);
+  setTimeout(()=>hyTalk('嘉琳！！！是我的嘉琳！！！'),1500);
+  const [x,y]=stageCenter('hy'); hearts(x,y,8);
+  beep(880,.12); cost();
+}
+function actVisit(){ const h=S.hy;
+  if(S.flags.visited){ deny('本周已经去过了！'); return; }
+  if(isNight()){ deny('深夜没有高铁！明早再出发吧'); return; }
+  if(S.money<120){ deny('路费不够！深圳→东莞高铁票 ¥120，先打工攒钱'); return; }
+  if(h.energy<20){ deny('他太累了，坐不了高铁，先睡觉！'); return; }
+  S.money-=120;
+  S.flags.visited=true; h.energy=clamp(h.energy-20); h.mood=clamp(h.mood+25);
+  feed('🚄 花¥120买高铁票，贺元本周去找嘉琳啦（本周任务✅）');
+  if(S.jl.unlocked){
+    S.jl.love=clamp(S.jl.love+12);
+    // V2编舞：两人张开手臂冲向对方，抱在一起转圈圈
+    jlint({ jlLine:'呜呜终于见面了！冲啊——抱！',
+      dur:2800,
+      onStart:()=>{ pose('hy','pose-lean',2800);
+        const sc=limbLayer('hy',2800); sc.face('happy');
+        sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.mouth[0]-60,BODY.hy.mouth[1]+160]},{t:.4,to:[BODY.hy.shL[0]-120,BODY.hy.shL[1]-100]}],{hand:''});
+        sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.mouth[0]+60,BODY.hy.mouth[1]+160]},{t:.4,to:[BODY.hy.shR[0]+120,BODY.hy.shR[1]-100]}],{hand:'',side:-1});
+        return sc; },
+      jlStart:()=>{ pose('jl','pose-lean',2800);
+        const sc=limbLayer('jl',2800); sc.face('happy');
+        sc.limb('arm',BODY.jl.shL,[{t:0,to:[BODY.jl.mouth[0]-60,BODY.jl.mouth[1]+200]},{t:.4,to:[BODY.jl.shL[0]-110,BODY.jl.shL[1]-80]}],{hand:'',side:1});
+        sc.limb('arm',BODY.jl.shR,[{t:0,to:[BODY.jl.mouth[0]+60,BODY.jl.mouth[1]+200]},{t:.4,to:[BODY.jl.shR[0]+110,BODY.jl.shR[1]-80]}],{hand:'',side:-1});
+        return sc; },
+      hyAnim:'anim-hug', jlProps:['💞','🤗'],
+      hyLine:'见面比什么都开心！！（抱起来转圈）',
+      hearts:8,
+      after:()=>{ if(!S.flags.sleeping){ bubble('hy','（拉着嘉琳的手不肯放）再去吃顿饭嘛',3500); playAnim('jl','anim-dance',null,2000);} }});
+  }else{
+    playAnim('hy','anim-jump',['🚄','🧳','💞']);
+    bubble('hy','见面比什么都开心！！',4000);
+    const [x,y]=stageCenter('hy'); hearts(x,y,8);
+  }
+  beep(760,.12); cost();
+}
+function actJunk(){ const h=S.hy;
+  if(h.egg){ deny('他在当受精卵，只能靠说爱他来孵化！'); return; }
+  if(S.flags.sleeping){ deny('他睡得正香呢！再点一次哄睡把他叫醒！'); return; }
+  if(S.money<15){ deny('垃圾食品套餐要 ¥15，米缸见底了！'); return; }
+  S.money-=15; S.meals=(S.meals||0)+1;
+  h.hunger=clamp(h.hunger+30); h.mood=clamp(h.mood+15); h.health=clamp(h.health-12);
+  feed('🍔 花¥15买了炸鸡快乐套餐（饱食+30 心情+15 健康-12）');
+  pose('hy','pose-lean',2400);
+  const sc=limbLayer('hy',2400); sc.face('chomp');
+  sc.limb('arm',BODY.hy.shR,osc([BODY.hy.mouth[0]+95,BODY.hy.mouth[1]+120],5,12,.1),{hand:'🍔'});
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-50,BODY.hy.shL[1]-60]}],{hand:'🥤',side:1});
+  fx('hy','<span class="poopFall" style="left:30%;top:24%">🍟</span><span class="poopFall" style="left:58%;top:20%;animation-delay:.5s">🥤</span>',2200);
+  hyTalk(rnd(['咔滋咔滋！','神仙快乐水！','上瘾了上瘾了']));
+  setTimeout(()=>endScene(sc),2400);
+  beep(700); cost();
+}
+
+/* ---------- 嘉琳专属操作 ---------- */
+function actSlap(){ const h=S.hy;
+  if(h.egg){ deny('连受精卵都打，你是魔鬼吗！'); return; }
+  h.butt=clamp(h.butt+60); h.mood=clamp(h.mood-12); h.psych=clamp(h.psych-4);
+  feed('🖐️ 嘉琳走到贺元面前，抡圆了胳膊啪啪打他的屁屁！');
+  // V2编舞：贺元深撅屁股+疼到变形；嘉琳手臂大回环连环抽
+  jlint({ jlLine:rnd(['不乖就要打屁屁！','啪——深刻教训！','手抬高，屁股撅好！']),
+    dur:2200,
+    onStart:()=>{ pose('hy','pose-bend2',2200);
+      const sc=limbLayer('hy',2200); sc.face('pain');
+      sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.belly[0]-60,BODY.hy.belly[1]+40]}],{hand:''});
+      sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.belly[0]+60,BODY.hy.belly[1]+40]}],{hand:'',side:-1});
+      return sc; },
+    jlStart:()=>{ pose('jl','pose-lean',2200);
+      const sc=limbLayer('jl',2200); sc.face('strict');
+      // 手臂抡圆了大回环：抬到最高→狠狠抽到屁屁方向→再抬→再抽
+      const hits=[[BODY.jl.mouth[0]+230,BODY.jl.mouth[1]+260],[BODY.jl.mouth[0]+230,BODY.jl.mouth[1]+320]];
+      const keys=[{t:0,to:[BODY.jl.shR[0]-10,BODY.jl.shR[1]-260]}];
+      keys.push({t:.22,to:[BODY.jl.shR[0]+120,BODY.jl.shR[1]-300]});
+      keys.push({t:.32,to:hits[0]});
+      keys.push({t:.45,to:[BODY.jl.shR[0]+120,BODY.jl.shR[1]-300]});
+      keys.push({t:.58,to:hits[1]});
+      keys.push({t:.72,to:[BODY.jl.shR[0]+120,BODY.jl.shR[1]-300]});
+      keys.push({t:.85,to:[BODY.jl.mouth[0]+200,BODY.jl.mouth[1]+230]});
+      sc.limb('arm',BODY.jl.shR,keys,{hand:'🖐',side:-1,bend:130});
+      return sc; },
+    fxHY:'<span class="buttHit" style="left:52%;bottom:26px">💢</span>',
+    hyLine:rnd(['哇——疼！！','为什么要打屁屁呜呜','（撅着屁股挨打）','疼但是好喜欢（小声）']),
+    hearts:1,
+    onTick:(f)=>{ if(Math.abs(f-.32)<.03||Math.abs(f-.58)<.03||Math.abs(f-.85)<.03){ impact('hy',56,76); beep(150,.07,'square'); } },
+    after:()=>{ if(!S.flags.sleeping){ bubble('hy', rnd(['（揉揉屁屁）好辣……','（幽怨地看你）记住了……','下次……还敢（小声）']),3000); playAnim('hy','anim-wiggle',null,1200);} }});
+  beep(200,.1,'square'); render();
+}
+function actWipe(){ const h=S.hy;
+  h.hygiene=100; h.mood=clamp(h.mood+6); S.flags.wiped=true;
+  feed('🧻 嘉琳走到贺元身后，拿着纸给他把屁屁擦得干干净净');
+  // V2编舞：贺元弯腰脱裤子害羞；嘉琳伸长手拿纸圈圈擦
+  jlint({ jlLine:rnd(['乖，我给你擦干净','抬起来一点点哦','擦屁屁时间到~']),
+    dur:2600,
+    onStart:()=>{ pose('hy','pose-bend',2600);
+      const sc=limbLayer('hy',2600); sc.face('shy');
+      sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.belly[0]-50,BODY.hy.belly[1]+60]}],{hand:''});
+      sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.belly[0]+50,BODY.hy.belly[1]+60]}],{hand:'',side:-1});
+      fx('hy','<span class="pantsDrop" style="left:34%;bottom:8px">👖</span>',2600);
+      return sc; },
+    jlStart:()=>{ pose('jl','pose-lean',2600);
+      const sc=limbLayer('jl',2600); sc.face('happy');
+      // 擦擦擦：手臂末端绕着目标画圈
+      const c=[BODY.jl.mouth[0]+220,BODY.jl.mouth[1]+300];
+      const keys=[{t:0,to:[BODY.jl.shR[0]+40,BODY.jl.shR[1]-40]},{t:.15,to:c}];
+      for(let i=1;i<=7;i++){ const a=i*0.9;
+        keys.push({t:.15+i*.1,to:[c[0]+Math.cos(a)*34, c[1]+Math.sin(a)*22]}); }
+      keys.push({t:1,to:c});
+      sc.limb('arm',BODY.jl.shR,keys,{hand:'🧻',side:-1,bend:110});
+      return sc; },
+    hyLine:rnd(['（乖乖撅好）谢谢嘉琳……好害羞','擦得真干净！','高级享受！！']),
+    hearts:3,
+    after:()=>{ if(!S.flags.sleeping){ bubble('hy','（红着脸小声）要不要……再擦一遍',3000);} }});
+  beep(600); render();
+}
+function actPoop(){ const h=S.hy;
+  if(S.flags.pooped){ deny('今天已经拉过了，攒不住的！'); return; }
+  if((S.meals||0)<1){ deny('肚子空空的，什么都拉不出来……先喂饭！'); return; }
+  S.flags.pooped=true;
+  if(S.flags.wiped){ feed('💩 嘉琳在旁边监督，贺元坐在马桶上用力拉了屎'); }
+  else{ h.hygiene=clamp(h.hygiene-25); feed('💩 嘉琳监督拉屎，贺元拉了但没擦屁屁！卫生下降！'); }
+  // V2编舞：贺元坐马桶憋红脸用力，💩一颗颗掉；嘉琳坐草地上监督
+  jlint({ jlLine:rnd(['我看着呢，快拉！','拉完我要检查的！','蹲好，不许乱跑']),
+    dur:3000,
+    onStart:()=>{ pose('hy','pose-sit',3000);
+      const sc=limbLayer('hy',3000); sc.face('strain');
+      sc.limb('leg',BODY.hy.hipL,[{t:0,to:BODY.hy.footL},{t:.2,to:[BODY.hy.footL[0]-90,BODY.hy.footL[1]-40]}],{});
+      sc.limb('leg',BODY.hy.hipR,[{t:0,to:BODY.hy.footR},{t:.2,to:[BODY.hy.footR[0]+90,BODY.hy.footR[1]-40]}],{});
+      sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-70,BODY.hy.shL[1]-60]}],{hand:''});
+      sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+70,BODY.hy.shR[1]-60]}],{hand:'',side:-1});
+      fx('hy','<span class="toiletPop" style="left:14%;bottom:-14px;font-size:46px">🚽</span><span class="pantsDrop" style="left:36%;bottom:16px;font-size:36px">👖</span><span class="poopFall" style="left:44%;bottom:24px">💩</span><span class="poopFall" style="left:50%;bottom:24px;animation-delay:.9s">💩</span><span class="poopFall" style="left:46%;bottom:24px;animation-delay:1.8s">💩</span>',3000);
+      return sc; },
+    jlStart:()=>{ pose('jl','pose-sit',3000);
+      const sc=limbLayer('jl',3000); sc.face('strict');
+      sc.limb('arm',BODY.jl.shR,[{t:0,to:[BODY.jl.shR[0]+80,BODY.jl.shR[1]-140]},{t:.5,to:[BODY.jl.shR[0]+80,BODY.jl.shR[1]-100]},{t:1,to:[BODY.jl.shR[0]+80,BODY.jl.shR[1]-140]}],{hand:'⏱️',side:-1});
+      fx('jl','<span class="grassMat" style="left:-14px;bottom:2px">🌿🌿🌿</span>',3000);
+      return sc; },
+    onTick:(f)=>{ if(Math.abs(f-.3)<.02||Math.abs(f-.55)<.02||Math.abs(f-.8)<.02) beep(220,.1,'triangle'); },
+    hyLine:S.flags.wiped? '（坐在马桶上）拉得特别通畅！嘉琳最好了':'（坐在马桶上僵住）忘……忘擦了……',
+    hearts:0,
+    after:()=>{ if(!S.flags.wiped && !S.flags.sleeping) bubble('hy','（希望嘉琳没看见）……看见了吧',3000); }});
+  beep(300,.1,'triangle'); render();
+}
+function actCheckPoop(){ const h=S.hy;
+  const healthy = h.health>=60;
+  const good=['金黄色，香蕉状，完美！💯','成形成段，色泽健康！','今天拉得特别有精神！'];
+  const bad=['绿色的……昨晚垃圾食品吃多了','稀的！还带泡泡，危险⚠️','黑色颗粒状，这是憋坏了！','形状诡异……建议直接送医'];
+  const txt = healthy? rnd(good):rnd(bad);
+  modal(`<div class="frog">🔬💩</div><h4>今日💩检验报告</h4><p>${txt}</p>
+    ${healthy?'<p style="color:#7fbf6f;font-weight:900">结论：健康！继续保持！</p>':'<p style="color:#ff6b6b;font-weight:900">结论：不健康！健康-15，建议立刻送医！</p>'}
+    <button class="btn blue" onclick="closeModal()">收到</button>`);
+  if(!healthy){ h.health=clamp(h.health-15); }
+  S.flags.poopChecked=true;
+  feed('🔬 嘉琳检查了贺元的💩：'+txt);
+  render();
+}
+function actLove(){ const h=S.hy;
+  S.flags.loved=true; h.psych=clamp(h.psych+18); h.mood=clamp(h.mood+15);
+  if(h.egg){
+    h.eggLove=(h.eggLove||0)+1;
+    feed(`💗 嘉琳走到蛋前说爱他（孵化进度 ${h.eggLove}/5）`);
+    jlint({ jlLine:'小蛋蛋，嘉琳爱你哦💗', jlAnim:'anim-jump', jlProps:['💗','🥚'],
+      hyAnim:'anim-wiggle',
+      hyLine:rnd(['（蛋壳里传来微弱的心跳声）','呜……再爱我一次就能出来了','（蛋壳微微发光）']),
+      hearts:4, dur:1800});
+    if(h.eggLove>=5){
+      h.egg=false; h.eggLove=0; h.size=20; h.health=60; h.mood=60; h.hunger=50; h.energy=60; h.psych=60;
+      feed('🐣🎉 说满5次爱，受精卵孵化成功！贺元重新出生（体型20%，慢慢养大）');
+      modal(`<div class="frog">🐣</div><h4>破壳而出！</h4><p>爱意满了！贺元从受精卵里孵出来了！<br>体型只剩 20%，这次要好好照顾哦！</p><button class="btn pink" onclick="closeModal()">重新养成！</button>`);
+    }
+  }else{
+    feed('💗 嘉琳走到贺元面前说了爱他，两个人抱在一起（心理防崩✅）');
+    // V2编舞：贺元双手捂脸扭来扭去；嘉琳张开手臂抱上来
+    jlint({ jlLine:rnd(['我爱你呀，小贺元💗','过来，抱一下','今天也超喜欢你说']),
+      dur:2600,
+      onStart:()=>{ pose('hy','pose-twisty',2600);
+        const sc=limbLayer('hy',2600); sc.face('shy');
+        // 双手伸长捂住脸
+        sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-40,BODY.hy.shL[1]-20]},{t:.3,to:[BODY.hy.eyeL[0]-30,BODY.hy.eyeL[1]+10]}],{hand:'',bend:40});
+        sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+40,BODY.hy.shR[1]-20]},{t:.3,to:[BODY.hy.eyeR[0]+30,BODY.hy.eyeR[1]+10]}],{hand:'',side:-1,bend:-40});
+        return sc; },
+      jlStart:()=>{ pose('jl','pose-lean',2600);
+        const sc=limbLayer('jl',2600); sc.face('happy');
+        sc.limb('arm',BODY.jl.shL,[{t:0,to:[BODY.jl.mouth[0]-60,BODY.jl.mouth[1]+200]},{t:.4,to:[BODY.jl.shL[0]-110,BODY.jl.shL[1]-80]}],{hand:'💗',side:1});
+        sc.limb('arm',BODY.jl.shR,[{t:0,to:[BODY.jl.mouth[0]+60,BODY.jl.mouth[1]+200]},{t:.4,to:[BODY.jl.shR[0]+110,BODY.jl.shR[1]-80]}],{hand:'💖',side:-1});
+        return sc; },
+      hyAnim:'anim-hug', jlProps:['💗','💖'],
+      hyLine:rnd(['（双手捂脸）呜呜好害羞……但听到了！最爱嘉琳！','（捂着脸扭来扭去）再说一遍！','（捂脸偷笑）今天又活过来了！！']),
+      hearts:6,
+      after:()=>{ if(!S.flags.sleeping){ bubble('hy','（还想再抱一会儿）不许走……',3000); playAnim('hy','anim-spin',null,1000);} }});
+  }
+  beep(880,.1); render();
+}
+/* ---------- 毒液舌头·绳子物理版：舌根在嘉琳嘴里，整条连续，中间重力甩动像鞭子 ---------- */
+let tongueOn=false, tongueRAF=null, lastLick=0, rope=null;
+const ROPE_N=26, GRAV=0.55, DAMP=0.985, ROPE_LEN=340;
+const tongueTarget={x:0,y:0};
+function mouthAnchor(){
+  const s=$('stage').getBoundingClientRect();
+  const photo=document.querySelector('#boxJL .charPhoto');
+  const r=(photo||$('boxJL')).getBoundingClientRect();
+  return [r.left+r.width*0.47-s.left, r.top+r.height*0.55-s.top]; // 嘉琳立绘嘴巴位置
+}
+function ropeInit(){
+  const [mx,my]=mouthAnchor();
+  rope={pts:[], segLen:ROPE_LEN/(ROPE_N-1)};
+  for(let i=0;i<ROPE_N;i++){
+    const t=i/(ROPE_N-1);
+    const x=mx+(tongueTarget.x-mx)*t, y=my+(tongueTarget.y-my)*t;
+    rope.pts.push({x,y,px:x,py:y});
+  }
+}
+function ropeStep(){
+  const [mx,my]=mouthAnchor(), sr=$('stage').getBoundingClientRect();
+  const p=rope.pts, seg=rope.segLen, N=ROPE_N;
+  // 目标点限制在绳子够得着的范围+舞台内
+  let dx0=tongueTarget.x-mx, dy0=tongueTarget.y-my;
+  const reach=Math.hypot(dx0,dy0);
+  if(reach>ROPE_LEN*0.98){ tongueTarget.x=mx+dx0/reach*ROPE_LEN*0.98; tongueTarget.y=my+dy0/reach*ROPE_LEN*0.98; }
+  tongueTarget.x=Math.max(4,Math.min(sr.width-4,tongueTarget.x));
+  tongueTarget.y=Math.max(4,Math.min(sr.height-4,tongueTarget.y));
+  p[0].x=mx; p[0].y=my;                      // 舌根钉在嘴里
+  for(let i=1;i<N-1;i++){                    // verlet：中间点重力+惯性
+    const pt=p[i];
+    const vx=(pt.x-pt.px)*DAMP, vy=(pt.y-pt.py)*DAMP;
+    pt.px=pt.x; pt.py=pt.y;
+    pt.x+=vx; pt.y+=vy+GRAV;
+    pt.x=Math.max(4,Math.min(sr.width-4,pt.x)); pt.y=Math.max(4,Math.min(sr.height-4,pt.y));
+  }
+  p[N-1].x=tongueTarget.x; p[N-1].y=tongueTarget.y;  // 舌尖钉住鼠标
+  for(let k=0;k<5;k++){                      // 距离约束多轮松弛 → 鞭甩+回弹
+    for(let i=0;i<N-1;i++){
+      const a=p[i], b=p[i+1];
+      let dx=b.x-a.x, dy=b.y-a.y;
+      const d=Math.hypot(dx,dy)||0.001;
+      const diff=(d-seg)/d;
+      const ma=(i===0)?0:((i===N-2)?1:0.5);   // 两端钉住，力全给中间点
+      const mb=(i===N-2)?0:((i===0)?1:0.5);
+      a.x+=dx*diff*ma; a.y+=dy*diff*ma;
+      b.x-=dx*diff*mb; b.y-=dy*diff*mb;
+    }
+  }
+  // 渲染：沿绳子走向变宽度色带（根粗尖细）
+  const L=[], R=[];
+  for(let i=0;i<N;i++){
+    const a=p[Math.max(0,i-1)], b=p[Math.min(N-1,i+1)];
+    const ddx=b.x-a.x, ddy=b.y-a.y, dd=Math.hypot(ddx,ddy)||1;
+    const nx=-ddy/dd, ny=ddx/dd;
+    const t=i/(N-1), w=12*(1-t)+2.5*t;
+    L.push((p[i].x+nx*w).toFixed(1)+','+(p[i].y+ny*w).toFixed(1));
+    R.push((p[i].x-nx*w).toFixed(1)+','+(p[i].y-ny*w).toFixed(1));
+  }
+  $('tonguePath').setAttribute('d','M '+L.join(' L ')+' L '+R.reverse().join(' L ')+' Z');
+  const m0=p[2], m1=p[N>>1], m2=p[N-2];
+  $('tongueGloss').setAttribute('d','M '+m0.x.toFixed(1)+' '+m0.y.toFixed(1)+' Q '+m1.x.toFixed(1)+' '+m1.y.toFixed(1)+' '+m2.x.toFixed(1)+' '+m2.y.toFixed(1));
+  const tipP=p[N-1];
+  $('tongueTip').setAttribute('cx',tipP.x); $('tongueTip').setAttribute('cy',tipP.y);
+  // 舔到贺元了！
+  const hr=$('boxHY').getBoundingClientRect();
+  if(performance.now()-lastLick>650 && tipP.x>hr.left-sr.left && tipP.x<hr.right-sr.left && tipP.y>hr.top-sr.top && tipP.y<hr.bottom-sr.top){
+    lastLick=performance.now();
+    S.hy.mood=clamp(S.hy.mood+8); S.hy.psych=clamp(S.hy.psych+3);
+    bubble('hy', rnd(['哇！舌头攻击！','凉凉的黏黏的！','（被卷住）唔！！','再来一下……不是！']),2500);
+    playAnim('hy','anim-tremble',null,800);
+    const [hx,hy2]=stageCenter('hy'); hearts(hx,hy2,3); beep(500,.06);
+    feed('👅 嘉琳的毒液舌头舔到了贺元（心情+8 心理+3）'); render();
+  }
+  tongueRAF=requestAnimationFrame(ropeStep);
+}
+function actTongue(){
+  if(!S.jl.unlocked){ deny('舌头要嘉琳亲自出！先攒¥520解锁嘉琳～'); return; }
+  tongueOn=!tongueOn;
+  const jb=$('boxJL');
+  $('btnTongue').innerHTML = tongueOn? '👅 毒液舌头 ON<small>拖着绳子甩起来</small>' : '👅 舌头模式<small>毒液同款</small>';
+  if(tongueOn){
+    document.body.classList.add('tongue');
+    jb.style.transform='translateX(-115px) translateY(-14px)'; // 走到贺元旁边
+    playAnim('jl','anim-walk',null,700);
+    bubble('jl','张嘴～舌头借你玩👅',2200);
+    setTimeout(()=>{
+      if(!tongueOn) return;
+      const [mx,my]=mouthAnchor();
+      tongueTarget.x=mx; tongueTarget.y=my;
+      ropeInit();
+      $('tongueSvg').style.display='block';
+      tongueRAF=requestAnimationFrame(ropeStep);
+      toast('👅 毒液舌头上线！拖动鼠标甩起来——舌头是一整条绳子，中间会重力甩动，鞭子手感！');
+    },700);
+    beep(300,.08,'triangle');
+  }else{
+    document.body.classList.remove('tongue');
+    $('tongueSvg').style.display='none';
+    rope=null;
+    jb.style.transform=''; // 嘉琳收舌头走回原位
+    bubble('jl','（咻——收舌头）够用就收',2000);
+  }
+  render();
+}
+$('stage').addEventListener('pointermove', e=>{
+  if(!tongueOn) return;
+  const r=$('stage').getBoundingClientRect();
+  tongueTarget.x=e.clientX-r.left; tongueTarget.y=e.clientY-r.top;
+});
+$('stage').addEventListener('pointerdown', e=>{
+  if(!tongueOn) return;
+  const r=$('stage').getBoundingClientRect();
+  tongueTarget.x=e.clientX-r.left; tongueTarget.y=e.clientY-r.top;
+});
+
+/* ---------- 奶蛙上帝：随机露脸+抓包打屁股（六种形象随机抽） ---------- */
+const FROGS=['frog1.png','frog2.png','frog3.png','frog4.png','frog5.png','frog6.png'];
+const FROG_LINES=['👀 我看着呢','（突然出现）','都给我乖一点','嘿嘿，被我看到咯','今天也很努力嘛','哼哼～'];
+function frogShow(opts={}){
+  const st=$('stage'), sr=st.getBoundingClientRect();
+  const d=document.createElement('div'); d.className='frogPop';
+  const img=FROGS[(Math.random()*FROGS.length)|0];
+  d.innerHTML=`<img src="${img}">`+
+    (opts.slap? '<span class="handSwing">🖐</span>' : '')+
+    (opts.line? `<div class="frogLine">${opts.line}</div>` : '');
+  let x = opts.nearHy? ($('boxHY').getBoundingClientRect().left-sr.left-150)
+                     : 14+Math.random()*(sr.width-170);
+  d.style.left=Math.max(4,Math.min(sr.width-160,x))+'px';
+  d.style.top=(60+Math.random()*90)+'px';
+  st.appendChild(d);
+  beep(240,.09,'triangle');
+  setTimeout(()=>d.remove(), opts.dur||3000);
+}
+function frogSpank(reason){
+  frogShow({slap:true, nearHy:true, line:'抓到！'+reason+'！打屁股！', dur:3200});
+  pose('hy','pose-bend2',2400);
+  const sc=limbLayer('hy',2400); sc.face('pain');
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.belly[0]-60,BODY.hy.belly[1]+40]}],{hand:''});
+  sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.belly[0]+60,BODY.hy.belly[1]+40]}],{hand:'',side:-1});
+  [300,800,1300].forEach(t=>setTimeout(()=>{ // 奶蛙大手连拍三下：冲击环+抖动+音效
+    if(!S.flags.sleeping && !sc.done){ impact('hy',56,78); playAnim('hy','anim-shake',null,300); beep(150,.07,'square'); }
+  },t));
+  fx('hy','<span class="buttHit" style="left:52%;bottom:26px;font-size:44px">💢</span>',2400);
+  bubble('hy',rnd(['哇——被上帝抓到了！！','呜呜屁股开花了','下……下次不敢了！（才怪）']),3000);
+  S.hy.butt=clamp(S.hy.butt+45); S.hy.mood=clamp(S.hy.mood-10);
+  feed(`🐸 奶蛙上帝突然出现，抓到贺元${reason}，当场拍了三下屁屁！（屁股红度+45）`);
+  setTimeout(()=>endScene(sc),2400);
+  render();
+}
+setInterval(()=>{ // 上帝模式：时不时出来露个脸
+  if(S.mode!=='god' && !S.linked) return;
+  if(S.flags.sleeping || S.hy.egg || document.hidden) return;
+  if(Math.random()<0.15) frogShow({line:rnd(FROG_LINES)});
+},9000);
+
+/* ---------- 蠢蛋日记 ---------- */
+$('sillyAdd').onclick=()=>{
+  const v=$('sillyInput').value.trim();
+  if(!v) return;
+  S.silly.unshift({d:S.day, t:v});
+  $('sillyInput').value=''; renderSilly();
+  feed('🤪 蠢蛋行为已登记：'+v);
+  bubble('hy','……记这个干嘛啦！',3000);
+  toast('登记成功！贺元社死+1');
+  beep(400,.06);
+};
+function renderSilly(){
+  $('sillyList').innerHTML = S.silly.length? S.silly.map((s,i)=>
+    `<div><span class="time">第${s.d}天</span>${s.t}<span class="del" data-i="${i}">🗑️</span></div>`).join('')
+    : '<div style="border:none;background:none;text-align:center;color:#c9b0a0">还没有登记蠢蛋行为～</div>';
+  document.querySelectorAll('#sillyList .del').forEach(el=>el.onclick=()=>{
+    S.silly.splice(+el.dataset.i,1); renderSilly();
+  });
+}
+
+/* ---------- 聊天学舌 ---------- */
+const KEY_REPLIES = [
+  [/爱|喜欢|想你/, ()=>rnd(['我也爱你！！超级爱！','听到这句话能活三天！','爱到原地起飞！'])],
+  [/屁屁|屁股/, ()=>rnd(['（捂住屁屁）不要打！','屁屁归嘉琳管……','今天还没被打屁屁，开心'])],
+  [/屎|拉粑粑/, ()=>rnd(['今天有乖乖拉屎！','我的💩是金黄色的！','检查报告求求了别查了'])],
+  [/吃饭|喂|饿/, ()=>rnd(['饿了饿了！想吃嘉琳做的饭','干饭！干饭！','一碗不够要三碗！'])],
+  [/游戏|打游戏/, ()=>rnd(['就玩一把！真的就一把！','上号！！','游戏重要还是嘉琳重要？……嘉琳！游戏……嘉琳！'])],
+  [/学习|上课|作业|成绩/, ()=>rnd(['啊？学习？（装死）','马上学马上学','我成绩很稳的（心虚）'])],
+  [/笨蛋|蠢/, ()=>rnd(['（骄傲）我是大笨蛋！','只有嘉琳能这么说！','笨蛋也是可爱的笨蛋'])],
+  [/医院|生病/, ()=>rnd(['我健康得很！不用去医院！','（假装咳嗽）哦不对，装不了病','不许送我去医院！'])],
+  [/妈妈/, ()=>rnd(['妈妈！（自动切换）','嘉琳妈妈！！','咦我为什么叫妈妈……好自然'])],
+  [/钱|工资|打工/, ()=>rnd(['挣的钱都是嘉琳的！','我要努力打工养小嘉琳！','钱包空空也想给嘉琳买奶茶'])],
+];
+function hyReply(userText){
+  const p=PERSONALITY[S.hy.personality];
+  // 学舌
+  if(Math.random()<p.echoP){
+    const variants=[
+      `${p.say('「'+userText+'」')}（学你说话）`,
+      `贺元学你说：「${userText}」，然后再加一句：嘿嘿`,
+      `「${userText}」…… blah blah 贺元复读机启动`,
+    ];
+    bubble('hy', rnd(variants), 4500);
+    return;
+  }
+  for(const [re,fn] of KEY_REPLIES){
+    if(re.test(userText)){ bubble('hy', fn(), 4000); return; }
+  }
+  bubble('hy', rnd([ p.say(userText+'？'), '嗯嗯！'+userText+'！', userText+'（认真点头）', '嘉琳说什么都对！' ]), 4000);
+}
+function sendChat(){
+  const v=$('chatInput').value.trim(); if(!v) return;
+  $('chatInput').value='';
+  const log=$('chatLog');
+  log.insertAdjacentHTML('beforeend',`<div class="m"><b>我：</b>${v}</div>`);
+  setTimeout(()=>{
+    hyReply(v);
+    const p=PERSONALITY[S.hy.personality];
+    log.insertAdjacentHTML('beforeend',`<div class="m"><b style="color:#e88a4a">贺元：</b>${$('bubbleHY').textContent||'……'}</div>`);
+    log.scrollTop=log.scrollHeight;
+  }, 500+Math.random()*600);
+  log.scrollTop=log.scrollHeight;
+  feed('💬 你对贺元说：'+v);
+}
+$('chatSend').onclick=sendChat;
+$('chatInput').addEventListener('keydown',e=>{ if(e.key==='Enter') sendChat(); });
+
+/* ---------- 小贺元模式（V2编舞版） ---------- */
+function hyActStudy(){ const h=S.hy;
+  if(h.egg){ deny('你现在是个卵！卵学什么习！'); return; }
+  if(S.flags.sleeping){ deny('睡得正香呢！先去哄睡页把自己叫醒！'); return; }
+  if(h.energy<20){ deny('困到睁不开眼，先补觉！'); return; }
+  S.hy.grades=clamp(S.hy.grades+10); S.hy.energy=clamp(S.hy.energy-12); S.suspicious=clamp(S.suspicious-10);
+  feed('🐣 [贺元] 学习了！成就感满满（成绩+10，蔫坏值-10）');
+  pose('hy','pose-sit',4200);
+  const sc=limbLayer('hy',4200); sc.face('focus');
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-60,BODY.hy.shL[1]-180]}],{hand:'📚',side:1});
+  const wr=[BODY.hy.mouth[0]+130,BODY.hy.mouth[1]+300];
+  const wkeys=[{t:0,to:[BODY.hy.shR[0],BODY.hy.shR[1]-40]},{t:.15,to:wr}];
+  for(let i=1;i<=8;i++){ const a=i*0.8; wkeys.push({t:.15+i*.07,to:[wr[0]+Math.cos(a)*26, wr[1]+Math.sin(a)*16]}); }
+  wkeys.push({t:1,to:wr});
+  sc.limb('arm',BODY.hy.shR,wkeys,{hand:'✏️',side:-1});
+  fx('hy','<span class="toiletPop" style="left:4%;bottom:30%;font-size:42px">📖</span><span class="toiletPop" style="right:4%;bottom:30%;font-size:40px">🪑</span>',3200);
+  hyTalk('学会了！我真是天才！');
+  setTimeout(()=>{ if(!S.flags.sleeping && !h.egg){
+    const sc2=limbLayer('hy',1400); sc2.face('tired');
+    pose('hy','pose-bend',1300);
+    bubble('hy',rnd(['（瘫）学废了……','（揉手腕）写字写到手抽筋']),2500);
+    setTimeout(()=>endScene(sc2),1400); } },4200);
+  setTimeout(()=>endScene(sc),4200);
+  render(); beep(520);
+}
+function hyActGame(){ const h=S.hy;
+  if(h.egg){ deny('卵不会打游戏！'); return; }
+  if(S.flags.sleeping){ deny('睡得正香呢！先把自己叫醒！'); return; }
+  if(h.energy<15){ deny('没力气上号了，先睡觉！'); return; }
+  S.hy.grades=clamp(S.hy.grades-6); S.hy.mood=clamp(S.hy.mood+15); S.hy.energy=clamp(S.hy.energy-10); S.suspicious=clamp(S.suspicious+8);
+  feed('🐣 [贺元] 打游戏爽了一把（蔫坏值+8）');
+  pose('hy','pose-sit',3600);
+  const sc=limbLayer('hy',3400); sc.face('focus');
+  sc.limb('leg',BODY.hy.hipL,[{t:0,to:BODY.hy.footL},{t:.25,to:[640,1000]},{t:1,to:[640,1000]}]);
+  sc.limb('leg',BODY.hy.hipR,[{t:0,to:BODY.hy.footR},{t:.25,to:[545,1005]},{t:1,to:[545,1005]}]);
+  sc.limb('arm',BODY.hy.shL,osc([575,860],9,9,.07),{hand:'',side:1});
+  sc.limb('arm',BODY.hy.shR,osc([665,860],9,9,.07),{hand:'🎮',side:-1});
+  fx('hy','<span class="poopFall" style="left:50%;top:52%">🎮</span>',1200);
+  hyTalk('五杀了！（没人看见吧）');
+  setTimeout(()=>{ if(!S.flags.sleeping && !h.egg){ // 赢了跳起来
+    const sc2=limbLayer('hy',1500); sc2.face('wow');
+    sc2.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-30,BODY.hy.head[1]-160]}],{hand:''});
+    sc2.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+30,BODY.hy.head[1]-160]}],{hand:'✨'});
+    pose('hy','pose-jump2',1400); playAnim('hy','anim-jump',['✨','🔥'],1400);
+    const [x,y]=stageCenter('hy'); hearts(x,y,3);
+    setTimeout(()=>endScene(sc2),1500); } },3400);
+  setTimeout(()=>endScene(sc),3400);
+  if(Math.random()<0.35) setTimeout(()=>{ if(!S.flags.sleeping) frogSpank('偷打游戏'); },4400);
+  render(); beep(880,.05,'square');
+}
+function hyActDate(){ const h=S.hy;
+  if(h.egg){ deny('卵不能去约会！'); return; }
+  if(S.flags.sleeping){ deny('睡着了怎么约会！'); return; }
+  if(S.money<60){ deny('约会也要花钱的！先打工攒点私房钱（¥60）'); return; }
+  S.money-=60;
+  S.hy.mood=clamp(S.hy.mood+25); S.hy.psych=clamp(S.hy.psych+8); S.hy.energy=clamp(S.hy.energy-15); S.suspicious=clamp(S.suspicious+25);
+  if(S.jl.unlocked) S.jl.love=clamp(S.jl.love+10);
+  feed('🐣 [贺元] 花¥60偷偷出去和嘉琳约会了！！（巨爽但蔫坏值+25）');
+  pose('hy','pose-lean',2600);
+  const sc=limbLayer('hy',2600); sc.face('shy');
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-40,BODY.hy.shL[1]-20]},{t:.3,to:[BODY.hy.eyeL[0]-30,BODY.hy.eyeL[1]+10]}],{hand:'',bend:40});
+  sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+40,BODY.hy.shR[1]-20]},{t:.3,to:[BODY.hy.eyeR[0]+30,BODY.hy.eyeR[1]+10]}],{hand:'',side:-1,bend:-40});
+  fx('hy','<span class="poopFall" style="left:20%;top:20%">💌</span><span class="poopFall" style="left:66%;top:16%">🌹</span>',2200);
+  bubble('hy','嘿嘿嘿……天知地知~',3600);
+  setTimeout(()=>{ if(!S.flags.sleeping){ const [x,y]=stageCenter('hy'); hearts(x,y,6); } },1400);
+  if(Math.random()<0.45) setTimeout(()=>{ if(!S.flags.sleeping) frogSpank('偷偷约会'); },3800); // 约会被抓概率更高
+  setTimeout(()=>endScene(sc),2600);
+  render(); beep(760,.08);
+}
+function hyActJunk(){ const h=S.hy;
+  if(h.egg){ deny('卵只能吸收爱意！'); return; }
+  if(S.flags.sleeping){ deny('睡着了吃不了炸鸡！'); return; }
+  S.hy.mood=clamp(S.hy.mood+12); S.hy.health=clamp(S.hy.health-12); S.hy.hunger=clamp(S.hy.hunger+15); S.suspicious=clamp(S.suspicious+12);
+  S.meals=(S.meals||0)+1;
+  feed('🐣 [贺元] 偷吃垃圾食品（健康-12，明天💩大概率不健康）');
+  pose('hy','pose-lean',2400);
+  const sc=limbLayer('hy',2400); sc.face('chomp');
+  sc.limb('arm',BODY.hy.shR,osc([BODY.hy.mouth[0]+95,BODY.hy.mouth[1]+120],5,12,.1),{hand:'🍔'});
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-50,BODY.hy.shL[1]-60]}],{hand:'🥤',side:1});
+  fx('hy','<span class="poopFall" style="left:30%;top:24%">🍟</span><span class="poopFall" style="left:58%;top:20%;animation-delay:.5s">🥤</span>',2200);
+  hyTalk('炸鸡奶茶真快乐！');
+  if(Math.random()<0.3) setTimeout(()=>{ if(!S.flags.sleeping) frogSpank('偷吃垃圾食品'); },3200); // 奶蛙抓包
+  setTimeout(()=>endScene(sc),2400);
+  render();
+}
+function hyActCuddle(){ const h=S.hy;
+  if(h.egg){ deny('卵抱不了……但是可以说爱他！'); return; }
+  if(S.flags.sleeping){ deny('他睡得正香呢！先叫醒！'); return; }
+  S.hy.mood=clamp(S.hy.mood+14); S.hy.psych=clamp(S.hy.psych+8);
+  feed('🤗 [贺元] 求抱抱成功（心情+14 心理+8）');
+  if(S.jl.unlocked){
+    jlint({ jlLine:rnd(['来，抱住～','张手！我接住了','小贺元抱抱🤗']),
+      dur:2400,
+      onStart:()=>{ pose('hy','pose-lean',2400);
+        const sc=limbLayer('hy',2400); sc.face('happy');
+        sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-110,BODY.hy.shL[1]-110]}],{hand:''});
+        sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+110,BODY.hy.shR[1]-110]}],{hand:'',side:-1});
+        return sc; },
+      jlStart:()=>{ pose('jl','pose-lean',2400);
+        const sc=limbLayer('jl',2400); sc.face('happy');
+        sc.limb('arm',BODY.jl.shL,[{t:0,to:[BODY.jl.mouth[0]-110,BODY.jl.mouth[1]-60]}],{hand:'',side:1});
+        sc.limb('arm',BODY.jl.shR,[{t:0,to:[BODY.jl.mouth[0]+110,BODY.jl.mouth[1]-60]}],{hand:'',side:-1});
+        return sc; },
+      hyAnim:'anim-hug', jlProps:['🤗','💞'],
+      hyLine:rnd(['抱抱充电100%！','（把脸埋进嘉琳肩膀）','蹭蹭~最好闻了']),
+      hearts:5,
+      after:()=>{ if(!S.flags.sleeping) bubble('hy','（抱住不撒手）再抱十秒！十秒就好！',3000); }});
+  }else{ // 还没解锁嘉琳：自己抱自己（可怜）
+    pose('hy','pose-twisty',2200);
+    const sc=limbLayer('hy',2200); sc.face('shy');
+    sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.belly[0]-40,BODY.hy.belly[1]-20]}],{hand:''});
+    sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.belly[0]+40,BODY.hy.belly[1]-20]}],{hand:'',side:-1});
+    bubble('hy','呜……还没有嘉琳可以抱……自己抱自己呜呜',3200);
+    setTimeout(()=>endScene(sc),2200);
+  }
+  render(); beep(700,.08);
+}
+function hyActGift(){ const h=S.hy;
+  if(h.egg){ deny('送卵礼物它会孵成鸵鸟吗？不会！'); return; }
+  if(S.flags.sleeping){ deny('睡着了，收不到快递！'); return; }
+  if(S.money<30){ deny('礼物要 ¥30，先打工攒私房钱！'); return; }
+  S.money-=30; S.hy.mood=clamp(S.hy.mood+10);
+  feed('🎁 [贺元] 花¥30送了礼物');
+  pose('hy','pose-lean',2600);
+  const sc=limbLayer('hy',2600); sc.face('shy');
+  sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+60,BODY.hy.shR[1]-120]},{t:.3,to:[BODY.hy.mouth[0]+200,BODY.hy.mouth[1]+60]},{t:1,to:[BODY.hy.mouth[0]+200,BODY.hy.mouth[1]+60]}],{hand:'🎁',side:-1});
+  fx('hy','<span class="poopFall" style="left:56%;top:22%">🎀</span>',2000);
+  if(S.jl.unlocked){
+    S.jl.love=clamp(S.jl.love+15);
+    feed('💗 嘉琳收到礼物，爱意+15！');
+    jlint({ jlLine:rnd(['哇！给我的？！！！','（拆礼物）呜呜太喜欢了','你哪来的钱！！（感动）']),
+      dur:2400,
+      onStart:()=>sc,
+      jlStart:()=>{ pose('jl','pose-lean',2400);
+        const sc2=limbLayer('jl',2400); sc2.face('happy');
+        sc2.limb('arm',BODY.jl.shR,[{t:0,to:[BODY.jl.mouth[0]+150,BODY.jl.mouth[1]+40]}],{hand:'🎁',side:-1});
+        return sc2; },
+      hyAnim:'anim-jump', jlProps:['🎁','💗','✨'],
+      hyLine:'（紧张）喜……喜欢吗？我攒了好久的私房钱！',
+      hearts:6 });
+  }else{
+    hyTalk('（对着空气比划）等我攒够¥520解锁嘉琳，就能送出去了！');
+    setTimeout(()=>endScene(sc),2600);
+  }
+  render(); beep(880,.1);
+}
+function hyActMom(){ const h=S.hy;
+  if(h.egg){ deny('卵没有妈妈……只有嘉琳！'); return; }
+  if(S.flags.sleeping){ deny('睡着了，妈妈叫不醒……'); return; }
+  bubble('hy','妈妈～～！🥺',3000); feed('🐣 [贺元] 突然叫了妈妈（嘉琳专属彩蛋）');
+  pose('hy','pose-lean',2000);
+  const sc=limbLayer('hy',2000); sc.face('shy');
+  sc.limb('arm',BODY.hy.shL,osc([BODY.hy.mouth[0]-160,BODY.hy.mouth[1]+40],5,24,.1),{hand:''});
+  sc.limb('arm',BODY.hy.shR,osc([BODY.hy.mouth[0]+160,BODY.hy.mouth[1]+40],5,24,.1),{hand:'',side:-1});
+  const [x,y]=stageCenter('hy'); hearts(x,y,3);
+  setTimeout(()=>endScene(sc),2000);
+}
+function hyActPoop(){ const h=S.hy;
+  if(h.egg){ deny('卵拉不了屎！'); return; }
+  if(S.flags.pooped){ deny('今天已经拉过了，攒不住的！'); return; }
+  if((S.meals||0)<1){ deny('肚子空空的，拉不出来……先吃饭！'); return; }
+  S.flags.pooped=true; S.hy.hygiene=clamp(S.hy.hygiene-10);
+  feed('🐣 [贺元] 拉屎了（记得让嘉琳查报告）');
+  pose('hy','pose-sit',3000);
+  const sc=limbLayer('hy',3000); sc.face('strain');
+  sc.limb('leg',BODY.hy.hipL,[{t:0,to:BODY.hy.footL},{t:.2,to:[BODY.hy.footL[0]-90,BODY.hy.footL[1]-40]}],{});
+  sc.limb('leg',BODY.hy.hipR,[{t:0,to:BODY.hy.footR},{t:.2,to:[BODY.hy.footR[0]+90,BODY.hy.footR[1]-40]}],{});
+  sc.limb('arm',BODY.hy.shL,[{t:0,to:[BODY.hy.shL[0]-70,BODY.hy.shL[1]-60]}],{hand:''});
+  sc.limb('arm',BODY.hy.shR,[{t:0,to:[BODY.hy.shR[0]+70,BODY.hy.shR[1]-60]}],{hand:'',side:-1});
+  fx('hy','<span class="toiletPop" style="left:14%;bottom:-14px;font-size:46px">🚽</span><span class="poopFall" style="left:44%;bottom:24px">💩</span><span class="poopFall" style="left:52%;bottom:24px;animation-delay:.9s">💩</span>',3000);
+  hyTalk('（畅快）');
+  if(Math.random()<0.25) setTimeout(()=>{ if(!S.flags.sleeping) frogSpank('上厕所太久'); },3400);
+  setTimeout(()=>endScene(sc),3000);
+  render(); beep(300,.1,'triangle');
+}
+
+/* 突击检查 */
+function raidCheck(){
+  if(S.mode!=='hy' && !S.linked) return;
+  if(S.hy.egg) return;
+  if(Math.random() > 0.33) return;
+  setTimeout(()=>{
+    beep(300,.2,'square');
+    const caughtRisk = S.suspicious>20;
+    modal(`<div class="frog">🐸</div><h4>突击检查！</h4>
+      <p>一只奶蛙突然出现在贺元面前：<br>「嗯哼～今天有没有<b>好好学习</b>？有没有背着我<b>干坏事</b>？」</p>
+      <button class="btn green" id="mHonest">如实交代</button>
+      <button class="btn red" id="mLie">撒谎：「我超乖的！」</button>
+      ${S.suspicious>40?'<p style="font-size:11px;color:#a86ae8">（你蔫坏值很高，撒谎风险极大……）</p>':''}`);
+    $('mHonest').onclick=()=>{
+      closeModal();
+      S.suspicious=clamp(S.suspicious-30);
+      const pun = S.suspicious>50? 0:20;
+      if(pun){ S.money=Math.max(0,S.money-pun); }
+      feed(`🐸 [突击检查] 贺元如实交代${pun?`，奶蛙罚了 ¥${pun}`:'，态度良好免罚'}`);
+      bubble('hy', pun? '呜呜罚得好重……' : '坦白从宽！',3000);
+      render();
+    };
+    $('mLie').onclick=()=>{
+      closeModal();
+      const caught = caughtRisk && Math.random()<0.6;
+      if(caught){
+        S.chaosLeft=8; $('stage').classList.add('chaos');
+        S.money=Math.max(0,S.money-100); S.hy.mood=clamp(S.hy.mood-25);
+        feed('🐸 [动乱] 贺元撒谎被奶蛙当场拆穿！！引起动乱！罚没 ¥100！');
+        modal(`<div class="frog">🌪️🐸</div><h4>动乱！</h4><p>奶蛙震怒：「本上帝英明神武，岂容欺瞒！」<br>贺元被罚没 ¥100，世界震动中……</p>
+          <button class="btn red" onclick="closeModal()">接受制裁</button>`);
+      }else{
+        S.suspicious=clamp(S.suspicious+5);
+        feed('🐸 [突击检查] 贺元成功欺瞒了上帝！刺激感拉满！');
+        bubble('hy','骗过去了！哈哈哈我是天才！',3000);
+        toast('欺瞒成功！爽！');
+      }
+      render();
+    };
+  }, 1500);
+}
+
+/* 上帝真身彩蛋 */
+function godFrogPeek(){
+  if(S.mode!=='hy' || S.hy.egg || Math.random()>0.12) return;
+  setTimeout(()=>{
+    beep(500,.15,'triangle');
+    modal(`<div class="frog" style="width:120px;margin:0 auto">${frogSVG(120)}</div>
+      <h4>？！贺元撞见了</h4>
+      <p>贺元偷看到了上帝的真身——<b>原来一直是一只奶蛙！</b><br>要拆穿吗？拆穿会引起动乱哦……</p>
+      <button class="btn red" id="mExpose">当场拆穿！</button>
+      <button class="btn blue" id="mPretend">装没看见</button>`);
+    $('mExpose').onclick=()=>{
+      closeModal();
+      S.chaosLeft=10; $('stage').classList.add('chaos');
+      S.money=Math.max(0,S.money-50); S.hy.mood=clamp(S.hy.mood-15); S.hy.psych=clamp(S.hy.psych-10);
+      feed('🌪️ [动乱] 贺元拆穿了上帝是奶蛙！世界发生动乱！（罚没¥50）');
+      modal(`<div class="frog">🐸💥🌪️</div><h4>世界动乱！</h4>
+        <p>「既然被发现了……」奶蛙上帝现出真身，天旋地转！<br>贺元的钱包被吹走了 ¥50。</p>
+        <button class="btn red" onclick="closeModal()">（捂头躲避）</button>`);
+      render();
+    };
+    $('mPretend').onclick=()=>{
+      closeModal();
+      S.hy.psych=clamp(S.hy.psych+5);
+      feed('🐸 贺元装作没看见奶蛙真身，相安无事');
+      bubble('hy','（装傻）什么奶蛙？没看见没看见',3000);
+    };
+  },2000);
+}
+
+/* ---------- 弹窗 ---------- */
+function modal(html){ $('modal').innerHTML=html; $('modalBg').classList.add('on'); }
+function closeModal(){ $('modalBg').classList.remove('on'); }
+window.closeModal=closeModal;
+$('modalBg').addEventListener('click',e=>{ if(e.target.id==='modalBg') closeModal(); });
+
+/* ---------- 时间引擎 ---------- */
+setInterval(()=>{
+  if(S.flags.sleeping){
+    S.hy.energy=clamp(S.hy.energy+100/60*(S.sleepQuality||1)); // 夜里睡恢复翻倍，白天补觉减半
+    if(Math.random()<.05) bubble('hy','zZZ……',1500);
+  }else{
+    S.hy.hunger=clamp(S.hy.hunger-100/288*3);   // 每tick消耗（一天约掉光）
+    S.hy.energy=clamp(S.hy.energy-100/288*1.6);
+    S.hy.mood=clamp(S.hy.mood-100/288*(S.hy.hunger<30?2.2:1));
+  }
+  S.hy.butt=clamp(S.hy.butt-100/288*2);
+  if(S.hy.hygiene<40) S.hy.health=clamp(S.hy.health-.15);
+  if(S.hy.psych<30) S.hy.mood=clamp(S.hy.mood-.1);
+  // 哭泣提示
+  if(!S.hy.egg && S.hy.mood<25 && Math.random()<.02) bubble('hy','呜呜呜……',3000);
+  tickCheck();
+  render();
+},1000);
+
+function tickCheck(force){
+  S.ticks++;
+  if(!force && S.ticks % DAY_TICKS !== 0) return;
+  /* ====== 新的一天结算 ====== */
+  const h=S.hy;
+  S.day++; S.mins=8*60;
+  const missed=[];
+  if(!S.flags.fed) missed.push('没喂饭');
+  if(!S.flags.slept && !S.flags.sleeping) missed.push('没睡觉');
+  if(!S.flags.loved) missed.push('没人说爱他');
+  if(!S.flags.studied) { h.grades=clamp(h.grades-6); missed.push('没上课'); }
+  if(!S.flags.pooped){
+    if((S.meals||0)>=2){ S.flags.pooped=true; feed('💩 吃多了自然有便意，贺元今天自己拉过了（但没人给擦屁屁！）'); h.hygiene=clamp(h.hygiene-15); missed.push('拉了屎没人擦'); }
+    else { missed.push('没拉屎'); h.health=clamp(h.health-5); }
+  }
+  if(S.flags.pooped && !S.flags.wiped){ missed.push('拉了屎没擦屁屁'); h.hygiene=clamp(h.hygiene-30); h.health=clamp(h.health-8); }
+  // 心理健康：每天不说爱他 → 心里有问题
+  if(!S.flags.loved){
+    h.psych=clamp(h.psych-25);
+    if(h.psych<30 && h.health>0) feed('🧠 贺元今天没人说爱他，心理问题加重！再不管真的要进医院了！');
+  }
+  // 照顾不良 → 哭（不再变小，只有上课打工累瘦）
+  const careScore = (S.flags.fed?1:0)+(S.flags.slept||S.flags.sleeping?1:0)+(S.flags.loved?1:0);
+  if(careScore<=1 && !h.egg){
+    h.mood=clamp(h.mood-20);
+    feed(`😭 照顾不周（${missed.join('、')}）：贺元哭了一整天！再不管他心情要崩了`);
+  }else if(careScore===3 && h.size<100 && !h.egg){
+    h.size=clamp(h.size+5);
+    feed('😊 被照顾得很好，贺元慢慢长回来了一点');
+  }
+  if(missed.length && !h.egg) feed(`📋 昨日漏项：${missed.join('、')}`);
+  // 受精卵：说爱满5次即孵化（进度跨天不清零）
+  if(h.egg) feed(`🥚 受精卵孵化进度 ${h.eggLove||0}/5（对他说爱满5次就行）`);
+  // 变成受精卵
+  else if(h.size<=0){
+    h.egg=true; h.eggLove=0;
+    feed('🥚 贺元缩小缩小再缩小……退化成了受精卵！');
+    modal(`<div class="frog">🥚💔</div><h4>悲剧发生了</h4>
+      <p>由于长期没人管（没饭吃、没人爱、没人陪），<br><b>贺元退化成了一颗受精卵。</b><br><br>
+      别慌——只要对着他说<b>爱</b>，说满 <b>5 次</b>他就重新孵化！<br>养大还需要更久更久……</p>
+      <button class="btn red" onclick="closeModal()">开始疯狂说爱！</button>`);
+  }
+  // 每周结算
+  if((S.day-1)%7===0){
+    S.week++;
+    if(!S.flags.visited && !h.egg){
+      h.mood=clamp(h.mood-20); h.psych=clamp(h.psych-10);
+      feed('📉 本周贺元没去找嘉琳！他难过到不行（心情-20 心理-10）');
+      bubble('hy','一周没见嘉琳……呜呜好想她',4000);
+    }else if(S.flags.visited){
+      feed('✅ 新的一周！记得继续每周去找嘉琳哦');
+    }
+    S.flags.visited=false;
+  }
+  // 重置每日flag
+  S.flags={fed:false,slept:false,studied:false,gamed:false,chatted:false,loved:false,visited:S.flags.visited,pooped:false,wiped:false,poopChecked:false,sleeping:false};
+  S.meals=0;
+  render();
+}
+
+/* ---------- 模式切换 / 双人联机 ---------- */
+$('modeSwitch').onclick=()=>{
+  if(S.linked){ S.linked=false; feed('👥 双人联机已断开'); toast('联机已断开'); }
+  else{ S.mode = S.mode==='god'?'hy':'god'; 
+    feed(S.mode==='hy'? '🎮 你变成了小贺元本人！上帝开始不定期突击检查……' : '🫡 你变回了上帝模式');
+    if(S.mode==='hy') toast('小贺元模式：可以偷偷干坏事，但奶蛙会查！');
+    else toast('上帝模式回归'); 
+  }
+  render();
+};
+$('btnLink').onclick=()=>{
+  S.linked=!S.linked;
+  $('btnLink').textContent = S.linked? '❌ 断开双人联机' : '👥 开启双人联机（同时解锁上帝和小贺元的操作）';
+  feed(S.linked?'👥 双人好友联机开启！上帝和小贺元同屏操作！':'👥 双人联机关闭');
+  toast(S.linked?'联机开启！两个人一起玩吧':'联机关闭'); render();
+};
+
+/* ---------- 绑定按钮 ---------- */
+$('btnFeed').onclick=actFeed; $('btnSleep').onclick=actSleep; $('btnGame').onclick=actGame;
+$('btnStudy').onclick=actStudy; $('btnChatJL').onclick=actChatJL; $('btnWork').onclick=actWork;
+$('btnHospital').onclick=actHospital; $('btnUnlock').onclick=actUnlock; $('btnVisit').onclick=actVisit;
+$('btnJunk').onclick=actJunk;
+$('btnSlap').onclick=actSlap; $('btnWipe').onclick=actWipe; $('btnPoop').onclick=actPoop;
+$('btnCheckPoop').onclick=actCheckPoop; $('btnLove').onclick=actLove; $('btnTongue').onclick=actTongue;
+$('hyStudy').onclick=hyActStudy; $('hyGame').onclick=hyActGame; $('hyDate').onclick=hyActDate;
+$('hyJunk').onclick=hyActJunk; $('hyCuddle').onclick=hyActCuddle; $('hyGift').onclick=hyActGift;
+$('hyMom').onclick=hyActMom; $('hyPoop').onclick=hyActPoop;
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on'); $('page-'+t.dataset.page).classList.add('on');
+});
+document.querySelectorAll('#personBtns .btn').forEach(b=>b.onclick=()=>{
+  S.hy.personality=b.dataset.p; $('pNow').textContent=b.dataset.p;
+  feed('⚙️ 贺元性格变成了【'+b.dataset.p+'】');
+  hyTalk(); toast('性格已切换：'+b.dataset.p);
+});
+
+/* 突击检查定时器（小贺元模式或联机） */
+setInterval(()=>{ if(S.mode==='hy'||S.linked){ raidCheck(); godFrogPeek(); } }, 25000);
+
+/* ---------- 开场 ---------- */
+$('svgHY').innerHTML = hyPhoto('normal',1,false);
+renderSilly(); render();
+feed('🍼 「贺元养成计划」私人限定版启动！只有贺元和嘉琳能玩 💗');
+feed('💡 嘉琳每天记得：说爱他、查💩、擦屁屁；每周记得让他去找你！');
+bubble('hy','嘉琳！我把游戏做出来了！夸我！',5000);
+modal(`<div class="frog">🍼💗</div><h4>贺元养成计划 · 私人限定版</h4>
+  <p style="text-align:left;font-size:12.5px;line-height:1.9">
+  🫵 <b>上帝模式</b>：喂饭/哄睡/上课/打工，照顾不好他会哭、变小、最后退化成<b>受精卵</b>！<br>
+  💗 <b>嘉琳专属</b>：打屁屁/擦屁屁/查💩/每天说爱他/舌头模式/养小嘉琳看他们谈恋爱<br>
+  🐣 <b>小贺元模式</b>：偷学摸鱼/偷偷约会/垃圾食品，小心奶蛙上帝突击检查<br>
+  👥 <b>双人联机</b>：设置页开启，两人同屏一起玩<br>
+  🤪 <b>蠢蛋日记</b>：贺元的蠢行为永久存档！</p>
+  <button class="btn pink" onclick="closeModal()">开始养成！</button>`);
+</script>
+</body>
+</html>
